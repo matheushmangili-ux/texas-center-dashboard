@@ -682,13 +682,28 @@ async function loadFluxoData() {
       } catch (e) { /* continua tentando */ }
     }
 
-    /* 3. LY do mesmo dia encontrado */
+    /* 3. LY — mesmo dia da semana (seg com seg, ter com ter...) */
     let lyData = null;
     let lyDate = null;
     if (lastDayDate) {
-      lyDate = new Date(lastDayDate);
-      lyDate.setFullYear(lyDate.getFullYear() - 1);
+      const targetDow = lastDayDate.getDay(); // 0=dom, 1=seg...
+      const lyCandidate = new Date(lastDayDate);
+      lyCandidate.setFullYear(lyCandidate.getFullYear() - 1);
+      // Ajustar para o mesmo dia da semana mais próximo
+      const diff = targetDow - lyCandidate.getDay();
+      lyCandidate.setDate(lyCandidate.getDate() + diff);
+      lyDate = lyCandidate;
       lyData = await fetchFluxo(formatDateISO(lyDate), formatDateISO(lyDate)).catch(() => null);
+      // Se não tiver dados, tenta semana anterior/posterior
+      if (!lyData || !lyData.resumo || lyData.resumo.total_pessoas === 0) {
+        const lyAlt = new Date(lyCandidate);
+        lyAlt.setDate(lyAlt.getDate() - 7);
+        const altData = await fetchFluxo(formatDateISO(lyAlt), formatDateISO(lyAlt)).catch(() => null);
+        if (altData && altData.resumo && altData.resumo.total_pessoas > 0) {
+          lyData = altData;
+          lyDate = lyAlt;
+        }
+      }
     }
 
     fluxoData = {
