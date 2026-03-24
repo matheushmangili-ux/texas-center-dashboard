@@ -617,8 +617,21 @@ async function fetchS(gid) {
   }
 }
 
+/* Bug Websamos: em 2026, para puxar um dia específico (ex: 23),
+   data_fim precisa ser o dia seguinte (24). Em 2025 funciona normal. */
+function adjustEndDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (d.getFullYear() >= 2026) {
+    const next = new Date(d);
+    next.setDate(next.getDate() + 1);
+    return formatDateISO(next);
+  }
+  return dateStr;
+}
+
 async function fetchFluxo(startDate, endDate) {
-  const url = 'https://websamos.com.br/dashtexas.php?data_inicio=' + startDate + '&data_fim=' + endDate + '&vendedor=&canal=&ajax=1';
+  const adjustedEnd = adjustEndDate(endDate);
+  const url = 'https://websamos.com.br/dashtexas.php?data_inicio=' + startDate + '&data_fim=' + adjustedEnd + '&vendedor=&canal=&ajax=1';
   try {
     const c = new AbortController();
     const t = setTimeout(() => c.abort(), 8000);
