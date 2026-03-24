@@ -25,11 +25,9 @@ tailwind.config={
         dm:['"DM Sans"','sans-serif'],
       },
       animation:{
-        'warm-shift':'warmShift 25s ease infinite',
         'fade-in':'fadeIn 0.5s ease forwards',
       },
       keyframes:{
-        warmShift:{'0%,100%':{backgroundPosition:'0% 50%'},'50%':{backgroundPosition:'100% 50%'}},
         fadeIn:{from:{opacity:0,transform:'translateY(10px)'},to:{opacity:1,transform:'translateY(0)'}},
       }
     }
@@ -38,18 +36,14 @@ tailwind.config={
 </script>
 <style>
   /* Background & global styles */
-  body{background:linear-gradient(135deg,#f5f0e6 0%,#ede5d5 25%,#f5f0e6 50%,#e8dcc8 75%,#f5f0e6 100%);background-size:400% 400%;animation:warmShift 25s ease infinite}
-  body::after{content:'';position:fixed;inset:0;opacity:0.02;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px}
+  body{background:#ffffff}
 
   /* Keyframes */
-  @keyframes warmShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   @keyframes loadBar{0%{width:0}50%{width:70%}100%{width:100%}}
   @keyframes pulseSync{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
   @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-  /* Western silhouette background */
-  .western-bg::before{content:'';position:fixed;bottom:0;left:0;right:0;height:180px;opacity:.035;pointer-events:none;z-index:0;background-repeat:repeat-x;background-position:bottom center;background-size:auto 180px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 180'%3E%3Cpath fill='%230a0a0a' d='M0 180V120l30-10 20 5 40-25 15 10 25-15 35 20 20-8 30 15 25-20 40 10 20-5 15 12 45-30 20 15 30-10 25 20 35-25 20 10 40-15 25 18 15-8 30 12 20-20 45 25 15-10 25 15 35-20 20 8 30-12 40 20 20-15 15 10 25-18 40 22 20-10 30 15 25-8 35 12 20-5 30 8 25-15 40 18 15-10 20 12 45-20 20 10 30-8 25 15 5 0z'/%3E%3Cpath fill='%230a0a0a' d='M150 180v-30l3-20 2 5-1 10 3-8-2 12 5-25 2 15-1-8 3 18v31zM155 180v-25l-2-15 1 8-1-5 2 12v25z'/%3E%3Cpath fill='%230a0a0a' d='M380 180v-50l4-30 3 10-2 15 5-20-1 18 3-12 2 22-3-8 1 15 4-18v58zM375 180v-35l-3-20 2 12-1-8 2 15v36zM390 180v-28l2-15-1 8 1-5v40z'/%3E%3Cpath fill='%230a0a0a' d='M700 180v-45l3-25 2 8-1 12 4-18-2 15 3-10 1 20-2-5 1 12 3-15v51zM695 180v-30l-2-18 1 10-1-6 2 14v30z'/%3E%3Cpath fill='%230a0a0a' d='M950 180v-40l5-28 3 12-2 10 4-15-1 18 2-8 1 15-3-5 2 10 3-12v43zM945 180v-25l-3-15 2 8-1-5 2 12v25zM960 180v-20l2-12-1 6 1-4v30z'/%3E%3Cpath fill='%230a0a0a' d='M1100 180v-35l3-22 2 8-1 10 3-15-1 12 2-8 1 18-2-6 1 13v25z'/%3E%3C/svg%3E")}
 
   /* Heatmap cells */
   .hm-cell{border-radius:4px;padding:4px 2px;font-weight:700;font-size:8px;text-align:center;transition:transform .15s}
@@ -87,7 +81,7 @@ tailwind.config={
   .progress-bar-anim{transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
 
   /* Table row hover */
-  #tblRanking tbody tr:hover, #tblComm tbody tr:hover{background:rgba(196,162,101,0.08);transition:background 0.2s ease}
+  #tblTeam tbody tr:hover, #tblComm tbody tr:hover{background:rgba(196,162,101,0.08);transition:background 0.2s ease}
 
   /* Section title (DM Sans) */
   .section-title{font-family:"DM Sans",sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;letter-spacing:1px;opacity:0.7}
@@ -100,10 +94,10 @@ tailwind.config={
   .fluxo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
 </style>
 </head>
-<body class="font-inter text-dark min-h-screen antialiased western-bg">
+<body class="font-inter text-dark min-h-screen antialiased">
 
 <!-- Loading Screen -->
-<div id="loading" class="fixed inset-0 bg-palha-100 flex flex-col items-center justify-center z-[9999] transition-opacity duration-500">
+<div id="loading" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999] transition-opacity duration-500">
   <h2 class="font-orbitron text-2xl font-black tracking-[4px] uppercase text-dark mb-6">TEXAS CENTER</h2>
   <div class="w-48 h-[3px] bg-dark/10 rounded-full overflow-hidden mb-4">
     <div class="loading-bar w-full h-full"></div>
@@ -160,13 +154,30 @@ tailwind.config={
     </div>
   </div>
 
-  <!-- Seller Cards -->
+  <!-- Performance da Equipe (tabela unificada) -->
   <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
     <span class="flex-1 h-px bg-dark/10"></span>
-    Painel Individual dos Vendedores
+    Performance da Equipe
     <span class="flex-1 h-px bg-dark/10"></span>
   </p>
-  <div id="sellerCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-8 scroll-reveal"></div>
+  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs border-collapse" id="tblTeam">
+        <thead><tr class="bg-dark text-palha-50">
+          <th class="px-2 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider whitespace-nowrap w-10"></th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Realizado</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap min-w-[130px]">Atingimento</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Gap</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Projeção</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Comissão Est.</th>
+        </tr></thead>
+        <tbody id="teamBody"></tbody>
+      </table>
+    </div>
+  </div>
 
   <!-- Filtros -->
   <div class="flex flex-wrap gap-3 items-center mb-5 scroll-reveal">
@@ -214,32 +225,6 @@ tailwind.config={
     </div>
   </div>
 
-  <!-- Tabela Ranking -->
-  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mt-8 mb-4 scroll-reveal">
-    <span class="flex-1 h-px bg-dark/10"></span>
-    Performance Individual Detalhada
-    <span class="flex-1 h-px bg-dark/10"></span>
-  </p>
-  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-    <div class="overflow-x-auto">
-      <table class="w-full text-xs border-collapse" id="tblRanking">
-        <thead><tr class="bg-dark text-palha-50">
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">#</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Realizado</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">%</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Gap</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta/Dia</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Projeção</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">% Proj.</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Progresso</th>
-        </tr></thead>
-        <tbody id="rankBody"></tbody>
-      </table>
-    </div>
-  </div>
 
   <!-- Tabela Comissão -->
   <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
@@ -857,8 +842,7 @@ function render() {
   const k = getKPIs();
   renderKPIs(k);
   const rank = getRanking();
-  renderSellerCards(rank);
-  renderRankTable(rank);
+  renderTeamTable(rank);
   renderRankChart(rank);
   populateFilter(rank);
   renderCommTable(getComm());
@@ -911,87 +895,69 @@ function renderKPIs(k) {
 }
 
 /* ========================================================
-   SELLER CARDS
+   TEAM TABLE (unified compact view)
    ======================================================== */
-function renderSellerCards(rank) {
-  const el = document.getElementById('sellerCards');
-  if (!el) return;
-  const sellers = rank.filter(r => !r.isTotal);
-  let html = '';
+function renderTeamTable(rank) {
+  const b = document.getElementById('teamBody');
+  if (!b) return;
+  b.innerHTML = '';
 
-  sellers.forEach((s, idx) => {
-    const weeks = getSellerWeekly(s.nome);
-    let mood = cowboyMood(s.pct);
-    const setor = getSetor(s.nome);
-    const faixa = calcFaixa(s.pct);
-    const comEst = s.real * faixa.taxa;
-    const stNorm = normAccent(s.status);
-    const isAcima = stNorm.includes('ACIMA') || stNorm.includes('EXCELENTE') || s.pct >= 100;
-    const bc = isAcima ? 'bg-green-500' : s.pct >= 80 ? 'bg-green-500' : s.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
-    const tc = isAcima ? 'text-green-600' : s.pct >= 80 ? 'text-green-600' : s.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
-    const statusTxt = s.status || mood.label;
-    const initials = s.nome.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  rank.forEach(r => {
+    let mood = cowboyMood(r.pct);
+    const setor = getSetor(r.nome);
+    const faixa = calcFaixa(r.pct);
+    const comEst = r.real * faixa.taxa;
+    const stNorm = normAccent(r.status);
+    const isAcima = stNorm.includes('ACIMA') || stNorm.includes('EXCELENTE') || r.pct >= 100;
 
     if (isAcima) {
-      mood = {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', badge:'bg-green-500/20 text-green-400', label: mood.label, extra:'<i class="fa-solid fa-star text-[8px] text-yellow-400 absolute -top-0.5 -right-0.5"></i>'};
+      mood = {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', badge:'bg-green-500/20 text-green-400', label:'Acima da Meta', extra:''};
     }
 
-    const weeksHTML = weeks.map((w, i) => {
-      const wp = w.meta > 0 ? Math.min((w.real / w.meta) * 100, 100) : 0;
-      const wc = w.pct >= 100 ? 'bg-green-500' : w.pct >= 70 ? 'bg-yellow-500' : 'bg-red-400';
-      return `<div>
-        <div class="flex justify-between items-center py-1.5">
-          <span class="text-[9px] font-bold text-dark/30 uppercase tracking-wider w-12">Sem ${i + 1}</span>
-          <span class="text-[11px] font-bold font-space text-dark">${fK(w.real)}</span>
-          <span class="text-[9px] text-dark/25 font-medium">meta ${fK(w.meta)}</span>
-        </div>
-        <div class="w-full h-1 bg-dark/5 rounded-full overflow-hidden">
-          <div class="h-full rounded-full ${wc} progress-bar-anim" style="width:0%" data-target-width="${wp}%"></div>
-        </div>
-      </div>`;
-    }).join('');
+    const bc = isAcima ? 'bg-green-500' : r.pct >= 80 ? 'bg-green-500' : r.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+    const tc = isAcima ? 'text-green-600' : r.pct >= 80 ? 'text-green-600' : r.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
+    const statusTxt = r.status || mood.label;
 
-    html += `<div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover seller-card-stagger" style="opacity:0;transform:translateY(15px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1);transition-delay:${idx * 0.07}s;box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark p-4 flex items-center gap-3">
-        <div class="relative shrink-0">
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full ${mood.bg} ring-2 ${mood.ring} flex flex-col items-center justify-center">
-            <i class="fa-solid ${mood.icon} text-white text-[14px] sm:text-[16px] -mb-0.5"></i>
-            <span class="text-white font-black text-[9px] sm:text-[10px] font-space leading-none">${initials}</span>
-          </div>
-          ${mood.extra}
-        </div>
-        <div class="min-w-0">
-          <h3 class="text-white text-sm font-bold font-space truncate">${s.nome}</h3>
-          <p class="text-[9px] text-white/35 font-semibold uppercase tracking-wider mt-0.5">${setor}</p>
-          <span class="inline-block mt-1 text-[7px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${mood.badge}">${statusTxt}</span>
-        </div>
-      </div>
-      <div class="mx-4 mt-2 h-1 bg-dark/5 rounded-full overflow-hidden"><div class="${bc} h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="${Math.min(s.pct, 100)}%"></div></div>
-      <div class="p-4 space-y-1">${weeksHTML}</div>
-      <div class="bg-palha-200/40 p-3 grid grid-cols-2 gap-2 text-center">
-        <div><p class="text-[7px] text-dark/30 uppercase tracking-wider font-extrabold">Atingimento</p><p class="text-[15px] font-black font-space ${tc} mt-0.5">${fP(s.pct)}</p></div>
-        <div><p class="text-[7px] text-dark/30 uppercase tracking-wider font-extrabold">Comissão Est.</p><p class="text-[15px] font-black font-space text-green-600 mt-0.5">${fK(comEst)}</p></div>
-      </div>
-    </div>`;
-  });
+    /* TOTAL EQUIPE row */
+    const tot = r.isTotal ? ' bg-dark text-palha-50 font-bold' : '';
+    const totalTextGreen = r.isTotal ? 'text-green-300' : 'text-green-700';
+    const totalTextRed = r.isTotal ? 'text-red-300' : 'text-red-600';
+    const totalPctColor = r.isTotal ? (r.pct >= 80 ? 'text-green-300' : r.pct >= 50 ? 'text-yellow-300' : 'text-red-300') : tc;
+    const barBg = r.isTotal ? 'bg-palha-50/20' : 'bg-dark/5';
 
-  el.innerHTML = html;
+    /* Avatar */
+    const avatarHTML = r.isTotal
+      ? '<div class="w-8 h-8 rounded-full bg-palha-50/20 flex items-center justify-center"><i class="fa-solid fa-users text-palha-50/60 text-[10px]"></i></div>'
+      : '<div class="w-8 h-8 rounded-full ' + mood.bg + ' ring-1 ' + mood.ring + ' flex items-center justify-center"><i class="fa-solid ' + mood.icon + ' text-white text-[10px]"></i></div>';
 
-  /* Staggered fade-in */
-  requestAnimationFrame(() => {
-    document.querySelectorAll('.seller-card-stagger').forEach(card => {
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    });
+    /* Setor label */
+    const setorHTML = r.isTotal ? '' : '<p class="text-[8px] ' + (r.isTotal ? 'text-palha-50/40' : 'text-dark/30') + ' font-medium mt-0.5">' + setor + '</p>';
+
+    b.innerHTML += `<tr class="border-b border-dark/5 hover:bg-palha-100/50 transition-colors${tot}" data-v="${r.nome}">
+      <td class="px-2 py-2.5 text-center">${avatarHTML}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap"><span class="font-bold text-[11px]">${r.nome}</span>${setorHTML}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.meta)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-bold ${totalTextGreen} whitespace-nowrap">${fR(r.real)}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">
+        <div class="flex items-center gap-2">
+          <span class="tabular-nums font-space font-extrabold ${totalPctColor}">${fP(r.pct)}</span>
+          <div class="w-16 h-1.5 ${barBg} rounded-full overflow-hidden"><div class="${bc} h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="${Math.min(r.pct, 100)}%"></div></div>
+        </div>
+      </td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold ${totalTextRed} whitespace-nowrap">${fR(r.gap)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.proj)}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${statusTxt ? '<span class="inline-block px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(statusTxt) + '">' + statusTxt + '</span>' : ''}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-bold ${r.isTotal ? 'text-green-300' : 'text-green-600'} whitespace-nowrap">${fK(comEst)}</td>
+    </tr>`;
   });
 
   /* Animate progress bars */
   setTimeout(() => {
-    document.querySelectorAll('.progress-bar-anim').forEach(bar => {
+    document.querySelectorAll('#teamBody .progress-bar-anim').forEach(bar => {
       const tw = bar.getAttribute('data-target-width');
       if (tw) bar.style.width = tw;
     });
-  }, 300);
+  }, 200);
 }
 
 /* ========================================================
@@ -1196,46 +1162,6 @@ function badgeFor(st) {
   return 'bg-red-600/10 text-red-700';
 }
 
-/* ========================================================
-   RANKING TABLE - TOTAL row with dark bg
-   ======================================================== */
-function renderRankTable(rank) {
-  const b = document.getElementById('rankBody');
-  if (!b) return;
-  b.innerHTML = '';
-
-  rank.forEach(r => {
-    const bc = r.pct >= 80 ? 'bg-green-500' : r.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
-    const tc = r.pct >= 80 ? 'text-green-600' : r.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
-    /* TOTAL EQUIPE gets dark background with light text */
-    const tot = r.isTotal ? ' bg-dark text-palha-50 font-bold' : '';
-    const totalTextGreen = r.isTotal ? 'text-green-300' : 'text-green-700';
-    const totalTextRed = r.isTotal ? 'text-red-300' : 'text-red-600';
-    const totalPctColor = r.isTotal ? (r.pct >= 80 ? 'text-green-300' : r.pct >= 50 ? 'text-yellow-300' : 'text-red-300') : tc;
-
-    b.innerHTML += `<tr class="${tot}" data-v="${r.nome}">
-      <td class="px-3 py-2.5 font-bold ${r.isTotal ? 'text-palha-50/50' : 'text-dark/30'} tabular-nums font-space whitespace-nowrap">${r.rank}</td>
-      <td class="px-3 py-2.5 font-bold whitespace-nowrap">${r.nome}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.meta)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-bold ${totalTextGreen} whitespace-nowrap">${fR(r.real)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-extrabold ${totalPctColor} whitespace-nowrap">${fP(r.pct)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold ${totalTextRed} whitespace-nowrap">${fR(r.gap)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.metaDia)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.proj)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fP(r.pctProj)}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">${r.status ? '<span class="inline-block px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(r.status) + '">' + r.status + '</span>' : ''}</td>
-      <td class="px-3 py-2.5 min-w-[80px]"><div class="w-full h-1 ${r.isTotal ? 'bg-palha-50/20' : 'bg-dark/5'} rounded-full overflow-hidden"><div class="${bc} h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="${Math.min(r.pct, 100)}%"></div></div></td>
-    </tr>`;
-  });
-
-  /* Animate table progress bars */
-  setTimeout(() => {
-    document.querySelectorAll('#rankBody .progress-bar-anim').forEach(bar => {
-      const tw = bar.getAttribute('data-target-width');
-      if (tw) bar.style.width = tw;
-    });
-  }, 200);
-}
 
 /* ========================================================
    COMMISSION TABLE - TOTAL row with dark bg
@@ -1280,7 +1206,7 @@ function populateFilter(rank) {
 
 function applyFilters() {
   const v = document.getElementById('fVendedor').value;
-  document.querySelectorAll('#rankBody tr').forEach(tr => {
+  document.querySelectorAll('#teamBody tr').forEach(tr => {
     const n = tr.getAttribute('data-v');
     tr.style.display = (v === 'todos' || n === v || n === 'TOTAL EQUIPE') ? '' : 'none';
   });
