@@ -142,7 +142,8 @@ tailwind.config={
         <p class="text-[10px] text-dark/35 font-medium mt-0.5">Visão geral de metas e indicadores do mês</p>
       </div>
     </div>
-    <div id="kpiMain" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5"></div>
+    <div id="kpiMain" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
+    <div id="kpiRitmo" class="mb-5"></div>
     <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"></div>
   </section>
 
@@ -808,24 +809,230 @@ function renderKPIs(k) {
   const mainEl = document.getElementById('kpiMain');
   if (mainEl) {
     mainEl.innerHTML = `
-      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Realizado no Mês</p><p class="text-2xl font-black font-space text-green-600 tracking-tight kpi-counter" data-target="${k.realMes}">${fK(k.realMes)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">Meta: ${fK(k.metaMes)}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Atingimento</p><p class="text-2xl font-black font-space ${pc} tracking-tight">${fP(k.pctMes)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">Faltam ${fK(k.diffTotal)}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Projeção Mensal</p><p class="text-2xl font-black font-space text-blue-600 tracking-tight kpi-counter" data-target="${k.projecao}">${fK(k.projecao)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${fP(k.pctProj)} da meta</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Meta Diária Necessária</p><p class="text-2xl font-black font-space text-yellow-600 tracking-tight kpi-counter" data-target="${k.metaDiaNec}">${fK(k.metaDiaNec)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${k.diasRest} dias restantes</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Ritmo</p><div class="flex items-center gap-2"><i class="fa-solid ${ritmoIcon} text-2xl ${rc}"></i><p class="text-xl font-black font-space ${rc} tracking-tight">${k.ritmo || '---'}</p></div><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${ritmoDesc}</p></div>`;
+      <div class="kpi-card bg-dark border border-white/10 rounded-xl p-5 card-hover">
+        <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold mb-2">Realizado no Mês</p>
+        <p class="text-2xl font-black font-space text-green-400 tracking-tight kpi-counter" data-target="${k.realMes}">${fK(k.realMes)}</p>
+        <p class="text-[10px] text-white/35 mt-1 font-medium">Meta: ${fK(k.metaMes)}</p>
+        <div class="mt-3" style="height:90px"><canvas id="kpiChartReal"></canvas></div>
+      </div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-xl p-5 card-hover">
+        <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold mb-2">Atingimento</p>
+        <p class="text-2xl font-black font-space ${k.pctMes >= 80 ? 'text-green-400' : k.pctMes >= 50 ? 'text-yellow-400' : 'text-red-400'} tracking-tight">${fP(k.pctMes)}</p>
+        <p class="text-[10px] text-white/35 mt-1 font-medium">Faltam ${fK(k.diffTotal)}</p>
+        <div class="mt-3 flex justify-center" style="height:90px"><canvas id="kpiChartAting"></canvas></div>
+      </div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-xl p-5 card-hover">
+        <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold mb-2">Projeção Mensal</p>
+        <p class="text-2xl font-black font-space text-blue-400 tracking-tight kpi-counter" data-target="${k.projecao}">${fK(k.projecao)}</p>
+        <p class="text-[10px] text-white/35 mt-1 font-medium">${fP(k.pctProj)} da meta</p>
+        <div class="mt-3" style="height:90px"><canvas id="kpiChartProj"></canvas></div>
+      </div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-xl p-5 card-hover">
+        <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold mb-2">Meta Diária Necessária</p>
+        <p class="text-2xl font-black font-space text-yellow-400 tracking-tight kpi-counter" data-target="${k.metaDiaNec}">${fK(k.metaDiaNec)}</p>
+        <p class="text-[10px] text-white/35 mt-1 font-medium">${k.diasRest} dias restantes</p>
+        <div class="mt-3" style="height:90px"><canvas id="kpiChartMeta"></canvas></div>
+      </div>`;
     mainEl.querySelectorAll('.kpi-counter').forEach(el => { const target = parseFloat(el.getAttribute('data-target')); if (target > 0) animateCounter(el, target, '', '', 1500); });
+    renderKPICharts(k, pc);
+  }
+
+  /* Ritmo card separado */
+  const ritmoEl = document.getElementById('kpiRitmo');
+  if (ritmoEl) {
+    ritmoEl.innerHTML = `
+      <div class="kpi-card bg-dark border border-white/10 rounded-xl p-4 card-hover inline-flex items-center gap-3">
+        <i class="fa-solid ${ritmoIcon} text-2xl ${rc}"></i>
+        <div>
+          <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold">Ritmo</p>
+          <p class="text-lg font-black font-space ${rc} tracking-tight leading-tight">${k.ritmo || '---'}</p>
+          <p class="text-[10px] text-white/35 font-medium">${ritmoDesc}</p>
+        </div>
+      </div>`;
   }
 
   const secEl = document.getElementById('kpiSec');
   if (secEl) {
     secEl.innerHTML = `
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Dias Trab.</p><p class="text-[15px] font-black font-space">${k.diasTrab}<span class="text-[11px] font-normal text-dark/25">/${k.diasTot}</span></p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Dias Rest.</p><p class="text-[15px] font-black font-space text-yellow-600">${k.diasRest}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Ref. LY</p><p class="text-[15px] font-black font-space">${fK(k.refLY)}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">% vs LY</p><p class="text-[15px] font-black font-space ${k.pctLY >= 100 ? 'text-green-600' : 'text-red-600'}">${fP(k.pctLY)}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Ticket Medio</p><p class="text-[15px] font-black font-space">${k.tkm || '---'}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">P.U</p><p class="text-[15px] font-black font-space">${k.pu || '---'}</p></div>
-      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">P.A</p><p class="text-[15px] font-black font-space">${k.pa || '---'}</p></div>`;
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">Dias Trab.</p><p class="text-[15px] font-black font-space text-white">${k.diasTrab}<span class="text-[11px] font-normal text-white/30">/${k.diasTot}</span></p></div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">Dias Rest.</p><p class="text-[15px] font-black font-space text-yellow-400">${k.diasRest}</p></div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">Ref. LY</p><p class="text-[15px] font-black font-space text-white">${fK(k.refLY)}</p></div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">% vs LY</p><p class="text-[15px] font-black font-space ${k.pctLY >= 100 ? 'text-green-400' : 'text-red-400'}">${fP(k.pctLY)}</p></div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">Ticket Medio</p><p class="text-[15px] font-black font-space text-white">${k.tkm || '---'}</p></div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">P.U</p><p class="text-[15px] font-black font-space text-white">${k.pu || '---'}</p></div>
+      <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">P.A</p><p class="text-[15px] font-black font-space text-white">${k.pa || '---'}</p></div>`;
+  }
+}
+
+/* ========================================================
+   KPI MINI-CHARTS
+   ======================================================== */
+const kpiCharts = {};
+function renderKPICharts(k, pc) {
+  /* Destroy previous instances */
+  Object.values(kpiCharts).forEach(c => c && c.destroy && c.destroy());
+
+  const fontFamily = "'DM Sans', sans-serif";
+  const noLegend = { display: false };
+  const noTicks = { display: false, grid: { display: false }, ticks: { display: false } };
+
+  /* 1) REALIZADO — barras semanais (realizado vs meta) */
+  const ctx1 = document.getElementById('kpiChartReal');
+  if (ctx1) {
+    kpiCharts.real = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['S1','S2','S3','S4'],
+        datasets: [
+          { label: 'Realizado', data: k.realS, backgroundColor: 'rgba(74,222,128,.7)', borderRadius: 4, barPercentage: 0.6 },
+          { label: 'Meta', data: k.metaS, backgroundColor: 'rgba(196,162,101,.3)', borderRadius: 4, barPercentage: 0.6 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: noLegend, tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + (ctx.parsed.y/1000).toFixed(0) + 'k' },
+          bodyFont: { family: fontFamily, size: 10 }
+        }},
+        scales: {
+          x: { display: true, grid: { display: false }, ticks: { font: { family: fontFamily, size: 9, weight: 600 }, color: 'rgba(255,255,255,.35)' } },
+          y: noTicks
+        }
+      }
+    });
+  }
+
+  /* 2) ATINGIMENTO — doughnut gauge */
+  const ctx2 = document.getElementById('kpiChartAting');
+  if (ctx2) {
+    const pct = Math.min(k.pctMes, 100);
+    const remaining = Math.max(100 - pct, 0);
+    const color = k.pctMes >= 80 ? '#4ade80' : k.pctMes >= 50 ? '#facc15' : '#f87171';
+    kpiCharts.ating = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ['Atingido', 'Restante'],
+        datasets: [{
+          data: [pct, remaining],
+          backgroundColor: [color, 'rgba(255,255,255,.08)'],
+          borderWidth: 0, cutout: '75%'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: noLegend,
+          tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toFixed(1) + '%' }, bodyFont: { family: fontFamily, size: 10 } }
+        }
+      },
+      plugins: [{
+        id: 'centerText',
+        afterDraw(chart) {
+          const { ctx: c, width, height } = chart;
+          c.save();
+          c.font = 'bold 13px "Space Grotesk", sans-serif';
+          c.fillStyle = color;
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.fillText(k.pctMes.toFixed(0) + '%', width / 2, height / 2);
+          c.restore();
+        }
+      }]
+    });
+  }
+
+  /* 3) PROJEÇÃO — acumulado semanal vs meta linear */
+  const ctx3 = document.getElementById('kpiChartProj');
+  if (ctx3) {
+    const cumReal = []; let ac = 0;
+    k.realS.forEach(v => { ac += v; cumReal.push(ac); });
+    const cumMeta = []; let am = 0;
+    k.metaS.forEach(v => { am += v; cumMeta.push(am); });
+    kpiCharts.proj = new Chart(ctx3, {
+      type: 'line',
+      data: {
+        labels: ['S1','S2','S3','S4'],
+        datasets: [
+          {
+            label: 'Realizado Acum.',
+            data: cumReal,
+            borderColor: '#60a5fa',
+            backgroundColor: 'rgba(96,165,250,.15)',
+            fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#60a5fa', borderWidth: 2
+          },
+          {
+            label: 'Meta Acum.',
+            data: cumMeta,
+            borderColor: 'rgba(196,162,101,.6)',
+            borderDash: [4,3],
+            pointRadius: 0, borderWidth: 1.5, fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: noLegend, tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + (ctx.parsed.y/1000).toFixed(0) + 'k' },
+          bodyFont: { family: fontFamily, size: 10 }
+        }},
+        scales: {
+          x: { display: true, grid: { display: false }, ticks: { font: { family: fontFamily, size: 9, weight: 600 }, color: 'rgba(255,255,255,.35)' } },
+          y: noTicks
+        }
+      }
+    });
+  }
+
+  /* 4) META DIÁRIA — barra horizontal dias trabalhados vs restantes + linha de meta diária */
+  const ctx4 = document.getElementById('kpiChartMeta');
+  if (ctx4) {
+    kpiCharts.meta = new Chart(ctx4, {
+      type: 'bar',
+      data: {
+        labels: ['Progresso'],
+        datasets: [
+          { label: 'Dias Trabalhados', data: [k.diasTrab], backgroundColor: 'rgba(250,204,21,.6)', borderRadius: 4, barPercentage: 0.5 },
+          { label: 'Dias Restantes', data: [k.diasRest], backgroundColor: 'rgba(255,255,255,.08)', borderRadius: 4, barPercentage: 0.5 }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: noLegend,
+          tooltip: { bodyFont: { family: fontFamily, size: 10 } }
+        },
+        scales: {
+          x: { stacked: true, display: true, grid: { display: false },
+            max: k.diasTot,
+            ticks: { font: { family: fontFamily, size: 9, weight: 600 }, color: 'rgba(255,255,255,.35)',
+              callback: v => v + 'd'
+            }
+          },
+          y: { stacked: true, display: false }
+        }
+      },
+      plugins: [{
+        id: 'metaLine',
+        afterDraw(chart) {
+          if (!k.metaDiaNec || !k.metaMes) return;
+          const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+          /* Linha vertical indicando posição ideal (dias necessários p/ meta) */
+          const idealDays = k.metaMes > 0 ? Math.round(k.realMes / (k.metaMes / k.diasTot)) : k.diasTrab;
+          const xPos = x.getPixelForValue(Math.min(idealDays, k.diasTot));
+          c.save();
+          c.strokeStyle = '#16a34a';
+          c.lineWidth = 1.5;
+          c.setLineDash([3,3]);
+          c.beginPath(); c.moveTo(xPos, top); c.lineTo(xPos, bottom); c.stroke();
+          c.font = '600 8px "DM Sans", sans-serif';
+          c.fillStyle = '#16a34a';
+          c.textAlign = 'center';
+          c.fillText('ideal', xPos, top - 3);
+          c.restore();
+        }
+      }]
+    });
   }
 }
 
