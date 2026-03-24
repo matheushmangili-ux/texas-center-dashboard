@@ -58,6 +58,8 @@ tailwind.config={
   .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
 
   .sync-dot{animation:pulseSync 2s ease-in-out infinite}
+  @keyframes pulseBadge{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+  #ritmoStatus{animation:pulseBadge 2s ease-in-out infinite}
 
   .progress-bar-anim{transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
 
@@ -67,6 +69,11 @@ tailwind.config={
 
   .fluxo-card{background:#faf7f0;border:1px solid rgba(10,10,10,0.05);border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(124,92,62,0.08)}
   .fluxo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
+
+  /* Sidebar position */
+  #sidebar{left:-224px;transition:left .3s ease}
+  #sidebar.open{left:0!important}
+  @media(min-width:1024px){#sidebar{left:0!important}}
 
   /* Sidebar nav */
   .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s ease;font-family:'DM Sans',sans-serif;user-select:none}
@@ -97,7 +104,7 @@ tailwind.config={
 </div>
 
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed left-0 top-0 bottom-0 w-56 bg-dark flex flex-col z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+<aside id="sidebar" class="fixed top-0 bottom-0 w-56 bg-dark flex flex-col z-50">
   <!-- Logo -->
   <div class="px-5 pt-6 pb-5 border-b border-white/10">
     <h1 class="font-orbitron text-sm font-black tracking-[2px] text-palha-50 uppercase">Texas Center</h1>
@@ -131,19 +138,27 @@ tailwind.config={
 <!-- Main Content -->
 <main class="lg:ml-56 min-h-screen transition-all">
 
+  <!-- Top bar with Ritmo status -->
+  <div class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-dark/5 pl-14 lg:pl-8 pr-4 md:pr-8 py-3 flex items-center justify-between">
+    <div id="pageTitle">
+      <h2 class="text-sm font-black font-space text-dark tracking-tight">Painel Geral</h2>
+    </div>
+    <div id="ritmoStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark text-white text-[10px] font-bold font-space tracking-wide">
+      <span id="ritmoDot" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+      <i id="ritmoIcon" class="fa-solid fa-horse-head text-red-400 text-[11px]"></i>
+      <span id="ritmoLabel">---</span>
+    </div>
+  </div>
+
   <!-- Error Banner -->
   <div id="errorBanner" class="hidden bg-red-50 border border-red-200 rounded-lg px-4 py-3 mx-4 md:mx-8 mt-4 text-red-600 text-xs font-medium"></div>
 
   <!-- ==================== PAINEL GERAL ==================== -->
   <section id="sec-painel" class="page-section p-4 md:p-8">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h2 class="text-lg font-black font-space text-dark tracking-tight">Painel Geral</h2>
-        <p class="text-[10px] text-dark/35 font-medium mt-0.5">Visão geral de metas e indicadores do mês</p>
-      </div>
+    <div class="mb-5">
+      <p class="text-[10px] text-dark/35 font-medium">Visão geral de metas e indicadores do mês</p>
     </div>
     <div id="kpiMain" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
-    <div id="kpiRitmo" class="mb-5"></div>
     <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"></div>
   </section>
 
@@ -378,8 +393,17 @@ function navigateTo(pageId) {
     sec.style.animation = 'fadeIn 0.3s ease';
   }
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === pageId));
+  /* Update header page title */
+  const page = PAGES.find(p => p.id === pageId);
+  const pt = document.getElementById('pageTitle');
+  if (pt && page) pt.innerHTML = '<h2 class="text-sm font-black font-space text-dark tracking-tight">' + page.label + '</h2>';
   currentPage = pageId;
-  if (window.innerWidth < 1024) toggleSidebar();
+  if (window.innerWidth < 1024) {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    if (sb) sb.classList.remove('open');
+    if (ov) ov.classList.add('hidden');
+  }
   window.scrollTo(0, 0);
 
   /* Resize charts when navigating to graficos (they need visible container) */
@@ -394,11 +418,20 @@ function toggleSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sidebarOverlay');
   if (!sb || !ov) return;
-  sb.classList.toggle('-translate-x-full');
+  sb.classList.toggle('open');
   ov.classList.toggle('hidden');
 }
 
 initSidebar();
+
+/* On resize: close mobile sidebar overlay */
+window.addEventListener('resize', function() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  if (!sb || !ov) return;
+  sb.classList.remove('open');
+  ov.classList.add('hidden');
+});
 
 /* ========================================================
    HEADER MONTH
@@ -837,19 +870,8 @@ function renderKPIs(k) {
     renderKPICharts(k, pc);
   }
 
-  /* Ritmo card separado */
-  const ritmoEl = document.getElementById('kpiRitmo');
-  if (ritmoEl) {
-    ritmoEl.innerHTML = `
-      <div class="kpi-card bg-dark border border-white/10 rounded-xl p-4 card-hover inline-flex items-center gap-3">
-        <i class="fa-solid ${ritmoIcon} text-2xl ${rc}"></i>
-        <div>
-          <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold">Ritmo</p>
-          <p class="text-lg font-black font-space ${rc} tracking-tight leading-tight">${k.ritmo || '---'}</p>
-          <p class="text-[10px] text-white/35 font-medium">${ritmoDesc}</p>
-        </div>
-      </div>`;
-  }
+  /* Ritmo status no header */
+  updateRitmoStatus(k.ritmo, ritmoIcon, rNorm);
 
   const secEl = document.getElementById('kpiSec');
   if (secEl) {
@@ -862,6 +884,26 @@ function renderKPIs(k) {
       <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">P.U</p><p class="text-[15px] font-black font-space text-white">${k.pu || '---'}</p></div>
       <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">P.A</p><p class="text-[15px] font-black font-space text-white">${k.pa || '---'}</p></div>`;
   }
+}
+
+/* ========================================================
+   RITMO STATUS (header)
+   ======================================================== */
+function updateRitmoStatus(ritmo, icon, rNorm) {
+  const dot = document.getElementById('ritmoDot');
+  const ic = document.getElementById('ritmoIcon');
+  const lb = document.getElementById('ritmoLabel');
+  if (!dot || !ic || !lb) return;
+
+  const isCrit = rNorm.includes('CRIT');
+  const isAten = rNorm.includes('ATEN');
+  const dotColor = isCrit ? 'bg-red-500' : isAten ? 'bg-yellow-400' : 'bg-green-500';
+  const iconColor = isCrit ? 'text-red-400' : isAten ? 'text-yellow-300' : 'text-green-400';
+  const iconClass = isCrit ? 'fa-horse-head' : isAten ? 'fa-person-walking' : 'fa-horse';
+
+  dot.className = 'w-2 h-2 rounded-full animate-pulse ' + dotColor;
+  ic.className = 'fa-solid ' + iconClass + ' ' + iconColor + ' text-[11px]';
+  lb.textContent = ritmo || '---';
 }
 
 /* ========================================================
