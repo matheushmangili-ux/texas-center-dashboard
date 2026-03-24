@@ -91,24 +91,6 @@ tailwind.config={
   .sec-divider{display:flex;align-items:center;gap:12px;font-size:10px;color:rgba(10,10,10,.35);text-transform:uppercase;letter-spacing:2px;font-weight:800;font-family:'Space Grotesk',sans-serif;margin-bottom:16px}
   .sec-divider span{flex:1;height:1px;background:rgba(10,10,10,.1)}
 
-  /* Fullscreen chart modal */
-  #chartModal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px}
-  #chartModal.active{display:flex}
-  #chartModalInner{background:#faf7f0;border-radius:16px;width:100%;max-width:95vw;max-height:90vh;overflow:hidden;animation:fadeIn .3s ease;position:relative}
-  #chartModalHeader{background:#0a0a0a;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
-  #chartModalHeader span{font-size:13px;font-weight:700;color:#faf7f0;font-family:'Space Grotesk',sans-serif}
-  #chartModalClose{background:rgba(255,255,255,.1);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s}
-  #chartModalClose:hover{background:rgba(255,255,255,.2)}
-  #chartModalBody{padding:20px;height:calc(90vh - 60px);max-height:calc(90vh - 60px)}
-  #chartModalBody canvas{width:100%!important;height:100%!important}
-  @media(max-width:768px){
-    #chartModal{padding:8px}
-    #chartModalInner{max-width:100%;max-height:95vh;border-radius:12px}
-    #chartModalBody{padding:12px;height:calc(95vh - 52px);max-height:calc(95vh - 52px)}
-    #chartModalHeader{padding:10px 16px}
-    #chartModalHeader span{font-size:11px}
-  }
-
   .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 </head>
@@ -140,7 +122,7 @@ tailwind.config={
       <span class="w-1.5 h-1.5 rounded-full bg-green-500 sync-dot"></span>
       <span id="syncLabel">Conectando...</span>
     </div>
-    <button onclick="loadAllData()" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold font-space tracking-wide bg-white/10 text-palha-50 hover:bg-white/15 transition-all">
+    <button onclick="loadAllData();loadFluxoData()" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold font-space tracking-wide bg-white/10 text-palha-50 hover:bg-white/15 transition-all">
       <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
       Sincronizar
     </button>
@@ -179,7 +161,18 @@ tailwind.config={
       <p class="text-[10px] text-dark/35 font-medium">Visão geral de metas e indicadores do mês</p>
     </div>
     <div id="kpiMain" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
-    <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"></div>
+    <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-5"></div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário</span></div>
+        <div class="p-4"><div class="chart-box"><canvas id="chartSetor"></canvas></div></div>
+      </div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Heatmap de Vendas</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Vendedor x Dia</span></div>
+        <div class="p-4 overflow-x-auto" id="heatmapBox"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ==================== FLUXO DA LOJA ==================== -->
@@ -198,6 +191,11 @@ tailwind.config={
         <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo Dia Anterior</p>
         <div id="fluxoDia" class="text-dark/30 text-xs">Carregando dados de fluxo...</div>
       </div>
+    </div>
+    <div class="fluxo-card relative p-5 mt-3">
+      <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo Dia a Dia</p>
+      <div id="fluxoDiaDiaStatus" class="text-dark/30 text-xs">Carregando dados diários...</div>
+      <div class="chart-box mt-2"><canvas id="chartFluxoDiaDia"></canvas></div>
     </div>
   </section>
 
@@ -238,45 +236,6 @@ tailwind.config={
   </section>
 
   <!-- ==================== GRÁFICOS ==================== -->
-  <section id="sec-graficos" class="page-section p-4 md:p-8 hidden">
-    <div class="mb-6">
-      <h2 class="text-lg font-black font-space text-dark tracking-tight">Gráficos</h2>
-      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Visualizações de progresso semanal, ranking, evolução e mix de vendas</p>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('sem','Progresso Semanal')">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Progresso Semanal</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Meta vs Real<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
-        <div class="p-4"><div class="chart-box"><canvas id="chartSemanal"></canvas></div></div>
-      </div>
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('rank','Ranking de Atingimento')">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Ranking de Atingimento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">% da Meta<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
-        <div class="p-4"><div class="chart-box"><canvas id="chartRanking"></canvas></div></div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('evo','Evolução Acumulada')">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Evolução Acumulada</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Diário<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
-        <div class="p-4"><div class="chart-box"><canvas id="chartEvolucao"></canvas></div></div>
-      </div>
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('dep','Mix por Departamento')">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Mix por Departamento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Receita<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
-        <div class="p-4"><div class="chart-box"><canvas id="chartDepto"></canvas></div></div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('cat','Receita por Setor')">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
-        <div class="p-4"><div class="chart-box"><canvas id="chartSetor"></canvas></div></div>
-      </div>
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Heatmap de Vendas</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Vendedor x Dia</span></div>
-        <div class="p-4 overflow-x-auto" id="heatmapBox"></div>
-      </div>
-    </div>
-  </section>
 
   <!-- ==================== COMISSÃO ==================== -->
   <section id="sec-comissao" class="page-section p-4 md:p-8 hidden">
@@ -418,19 +377,6 @@ tailwind.config={
     <p class="text-[8px] text-dark/15 mt-1 font-medium tracking-wider">Painel de Gestão Comercial — Dados sincronizados em tempo real</p>
   </footer>
 
-<!-- Chart Fullscreen Modal -->
-<div id="chartModal" onclick="if(event.target===this)closeChartModal()">
-  <div id="chartModalInner">
-    <div id="chartModalHeader">
-      <span id="chartModalTitle">Gráfico</span>
-      <button id="chartModalClose" onclick="closeChartModal()"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="chartModalBody">
-      <canvas id="chartModalCanvas"></canvas>
-    </div>
-  </div>
-</div>
-
 </main>
 
 <script>
@@ -451,7 +397,6 @@ const PAGES = [
   {id:'painel', label:'Painel Geral', icon:'fa-gauge-high'},
   {id:'fluxo', label:'Fluxo da Loja', icon:'fa-people-arrows'},
   {id:'equipe', label:'Performance', icon:'fa-users'},
-  {id:'graficos', label:'Gráficos', icon:'fa-chart-line'},
   {id:'comissao', label:'Comissão', icon:'fa-coins'},
   {id:'frete', label:'Calculadora Frete', icon:'fa-truck-fast'},
   {id:'noticias', label:'Notícias', icon:'fa-newspaper'},
@@ -491,13 +436,6 @@ function navigateTo(pageId) {
     if (ov) ov.classList.add('hidden');
   }
   window.scrollTo(0, 0);
-
-  /* Resize charts when navigating to graficos (they need visible container) */
-  if (pageId === 'graficos') {
-    setTimeout(() => {
-      Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
-    }, 150);
-  }
 }
 
 function toggleSidebar() {
@@ -710,6 +648,90 @@ async function loadFluxoData() {
     if (mEl) mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar dados de fluxo</p>';
     if (dEl) dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar dados de fluxo</p>';
   }
+
+  /* Carregar dados dia a dia em paralelo */
+  loadFluxoDiaDia();
+}
+
+async function loadFluxoDiaDia() {
+  const statusEl = document.getElementById('fluxoDiaDiaStatus');
+  try {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const days = [];
+    for (let d = new Date(start); d <= yesterday; d.setDate(d.getDate() + 1)) {
+      days.push(formatDateISO(new Date(d)));
+    }
+    if (days.length === 0) {
+      if (statusEl) statusEl.innerHTML = '<p class="text-dark/30 text-xs">Sem dias anteriores para exibir</p>';
+      return;
+    }
+    if (statusEl) statusEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Buscando ' + days.length + ' dias...</p>';
+
+    const results = await Promise.allSettled(days.map(day => fetchFluxo(day, day)));
+
+    const labels = [];
+    const totais = [];
+    const homens = [];
+    const mulheres = [];
+    const criancas = [];
+    for (let i = 0; i < days.length; i++) {
+      const dayDate = new Date(days[i] + 'T12:00:00');
+      labels.push(String(dayDate.getDate()).padStart(2, '0') + '/' + String(dayDate.getMonth() + 1).padStart(2, '0'));
+      if (results[i].status === 'fulfilled' && results[i].value && results[i].value.resumo) {
+        const r = results[i].value.resumo;
+        totais.push(r.total_pessoas || 0);
+        homens.push(r.total_homens || 0);
+        mulheres.push(r.total_mulheres || 0);
+        criancas.push(r.total_criancas || 0);
+      } else {
+        totais.push(0);
+        homens.push(0);
+        mulheres.push(0);
+        criancas.push(0);
+      }
+    }
+
+    if (statusEl) statusEl.innerHTML = '';
+    renderFluxoDiaDia(labels, totais, homens, mulheres, criancas);
+  } catch (e) {
+    console.error('Fluxo dia a dia error:', e);
+    if (statusEl) statusEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar dados diários</p>';
+  }
+}
+
+function renderFluxoDiaDia(labels, totais, homens, mulheres, criancas) {
+  const ctx = document.getElementById('chartFluxoDiaDia');
+  if (!ctx) return;
+  if (charts.fluxoDiaDia) charts.fluxoDiaDia.destroy();
+
+  charts.fluxoDiaDia = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Total', data: totais, borderColor: '#0a0a0a', backgroundColor: 'rgba(10,10,10,0.08)', borderWidth: 2.5, pointRadius: 3, pointHoverRadius: 5, tension: 0.3, fill: true },
+        { label: 'Homens', data: homens, borderColor: '#2563eb', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 2, tension: 0.3, borderDash: [4, 2] },
+        { label: 'Mulheres', data: mulheres, borderColor: '#db2777', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 2, tension: 0.3, borderDash: [4, 2] },
+        { label: 'Crianças', data: criancas, borderColor: '#ca8a04', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 2, tension: 0.3, borderDash: [4, 2] }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 6, font: { size: 9, weight: '600' }, padding: 12 } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.parsed.y.toLocaleString('pt-BR') + ' pessoas' } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,.04)' }, ticks: { font: { size: 9 }, maxRotation: 45 } },
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)' }, ticks: { font: { size: 9 }, callback: v => v.toLocaleString('pt-BR') } }
+      }
+    }
+  });
 }
 
 /* ========================================================
@@ -904,14 +926,10 @@ function render() {
   renderKPIs(k);
   const rank = getRanking();
   renderTeamTable(rank);
-  renderRankChart(rank);
   populateFilter(rank);
   renderCommTable(getComm());
-  renderWeeklyChart(k);
   const daily = getDaily();
-  renderEvoChart(daily);
   renderHeatmap(daily);
-  renderDeptChart(getBD());
   renderSetorChart(getSetores());
 }
 
@@ -1217,40 +1235,6 @@ Chart.defaults.font.family = "'Inter',system-ui";
 Chart.defaults.color = '#999';
 const gC = 'rgba(0,0,0,.04)';
 
-function renderWeeklyChart(k) {
-  const ctx = document.getElementById('chartSemanal'); if (!ctx) return;
-  if (charts.sem) charts.sem.destroy();
-  charts.sem = new Chart(ctx, { type: 'bar', data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], datasets: [
-    {label: 'Meta', data: k.metaS, backgroundColor: 'rgba(10,10,10,.08)', borderColor: 'rgba(10,10,10,.25)', borderWidth: 1, borderRadius: 6, barPercentage: 0.5},
-    {label: 'Realizado', data: k.realS, backgroundColor: k.realS.map((v, i) => v >= k.metaS[i] ? 'rgba(22,163,74,.3)' : 'rgba(220,38,38,.3)'), borderColor: k.realS.map((v, i) => v >= k.metaS[i] ? '#16a34a' : '#dc2626'), borderWidth: 1, borderRadius: 6, barPercentage: 0.5}
-  ]}, options: { responsive: true, maintainAspectRatio: false, plugins: {legend: {labels: {usePointStyle: true, pointStyle: 'rectRounded', padding: 14, font: {size: 10, weight: 600}}}}, scales: { x: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}}, y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}} } } });
-}
-
-function renderRankChart(rank) {
-  const s = rank.filter(r => !r.isTotal).sort((a, b) => b.pct - a.pct);
-  const ctx = document.getElementById('chartRanking'); if (!ctx) return;
-  if (charts.rank) charts.rank.destroy();
-  charts.rank = new Chart(ctx, { type: 'bar', data: { labels: s.map(x => x.nome), datasets: [{ data: s.map(x => x.pct), backgroundColor: s.map(x => x.pct >= 80 ? 'rgba(22,163,74,.35)' : x.pct >= 50 ? 'rgba(202,138,4,.35)' : 'rgba(220,38,38,.35)'), borderColor: s.map(x => x.pct >= 80 ? '#16a34a' : x.pct >= 50 ? '#ca8a04' : '#dc2626'), borderWidth: 1, borderRadius: 4, barPercentage: 0.55 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}}, scales: { x: {grid: {color: gC}, ticks: {callback: v => v + '%', font: {size: 9}}, suggestedMax: 120}, y: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}} } } });
-}
-
-function renderEvoChart(daily) {
-  const ctx = document.getElementById('chartEvolucao'); if (!ctx) return;
-  if (charts.evo) charts.evo.destroy();
-  const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-  const labels = []; daily.forEach(w => days.forEach(d => labels.push(w.n + ' ' + d)));
-  const dt = []; daily.forEach(w => { for (let i = 0; i < 6; i++) { let t = 0; w.d.forEach(s => t += (s.vals[i] || 0)); dt.push(t); } });
-  const cum = []; let ac = 0; dt.forEach(v => { ac += v; cum.push(ac); });
-  const k = getKPIs(); const ml = labels.map((_, i) => k.metaMes * (i + 1) / labels.length);
-  charts.evo = new Chart(ctx, { type: 'line', data: { labels, datasets: [ {label: 'Realizado Acum.', data: cum, borderColor: '#0a0a0a', backgroundColor: 'rgba(10,10,10,.03)', fill: true, tension: 0.35, pointRadius: 1, pointHoverRadius: 4, borderWidth: 2}, {label: 'Meta Linear', data: ml, borderColor: 'rgba(220,38,38,.3)', borderDash: [5, 4], pointRadius: 0, borderWidth: 1.5, fill: false} ] }, options: { responsive: true, maintainAspectRatio: false, plugins: {legend: {labels: {usePointStyle: true, padding: 12, font: {size: 10, weight: 600}}}}, scales: { x: {grid: {display: false}, ticks: {maxRotation: 45, font: {size: 7}}}, y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e6).toFixed(1) + 'M', font: {size: 9}}} } } });
-}
-
-function renderDeptChart(deps) {
-  const ctx = document.getElementById('chartDepto'); if (!ctx) return;
-  if (charts.dep) charts.dep.destroy();
-  const colors = ['#0a0a0a', '#c4a265', '#16a34a', '#2563eb', '#dc2626', '#ca8a04', '#9333ea', '#ea580c', '#059669'];
-  charts.dep = new Chart(ctx, { type: 'doughnut', data: { labels: deps.map(d => d[0]), datasets: [{data: deps.map(d => d[1]), backgroundColor: colors.map(c => c + 'cc'), borderColor: '#faf7f0', borderWidth: 2, hoverOffset: 5}] }, options: { responsive: true, maintainAspectRatio: false, cutout: '58%', plugins: {legend: {position: 'right', labels: {usePointStyle: true, pointStyle: 'circle', padding: 8, font: {size: 9, weight: 500}}}} } });
-}
-
 function renderSetorChart(setores) {
   const ctx = document.getElementById('chartSetor'); if (!ctx) return;
   if (charts.cat) charts.cat.destroy();
@@ -1367,83 +1351,6 @@ document.getElementById('cepDestino')?.addEventListener('input', function(e) {
   if (v.length > 5) v = v.substring(0, 5) + '-' + v.substring(5);
   e.target.value = v;
 });
-
-/* ========================================================
-   FULLSCREEN CHART MODAL
-   ======================================================== */
-let modalChart = null;
-
-function openChartModal(chartKey, title) {
-  const modal = document.getElementById('chartModal');
-  const titleEl = document.getElementById('chartModalTitle');
-  const canvas = document.getElementById('chartModalCanvas');
-  if (!modal || !canvas) return;
-
-  titleEl.textContent = title || 'Gráfico';
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
-
-  const src = charts[chartKey];
-  if (!src) return;
-
-  if (modalChart) modalChart.destroy();
-
-  // Deep clone data (serializable) and rebuild options from scratch
-  const srcData = JSON.parse(JSON.stringify(src.data));
-  const srcType = src.config.type;
-
-  // Build clean fullscreen options
-  const fsOpts = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { labels: { usePointStyle: true, pointStyle: src.config.type === 'doughnut' ? 'circle' : 'rectRounded', padding: 16, font: { size: 13, weight: 600 } } },
-      tooltip: { bodyFont: { size: 13 }, titleFont: { size: 13 } }
-    }
-  };
-
-  // Copy over special options from source
-  const srcOpts = src.config.options || {};
-  if (srcOpts.indexAxis) fsOpts.indexAxis = srcOpts.indexAxis;
-  if (srcType === 'doughnut') { fsOpts.cutout = srcOpts.cutout || '58%'; fsOpts.plugins.legend.position = 'right'; }
-
-  // Rebuild scales with callbacks
-  if (srcOpts.scales) {
-    fsOpts.scales = {};
-    Object.entries(srcOpts.scales).forEach(([key, scale]) => {
-      fsOpts.scales[key] = {
-        grid: scale.grid || { display: true },
-        ticks: { font: { size: 12, weight: 500 } }
-      };
-      if (scale.grid && scale.grid.display === false) fsOpts.scales[key].grid = { display: false };
-      if (scale.ticks && scale.ticks.callback) fsOpts.scales[key].ticks.callback = scale.ticks.callback;
-      if (scale.ticks && scale.ticks.maxRotation !== undefined) fsOpts.scales[key].ticks.maxRotation = scale.ticks.maxRotation;
-      if (scale.suggestedMax) fsOpts.scales[key].suggestedMax = scale.suggestedMax;
-    });
-  }
-
-  // Copy tooltip callbacks
-  if (srcOpts.plugins && srcOpts.plugins.tooltip && srcOpts.plugins.tooltip.callbacks) {
-    fsOpts.plugins.tooltip.callbacks = srcOpts.plugins.tooltip.callbacks;
-  }
-  if (srcOpts.plugins && srcOpts.plugins.legend && srcOpts.plugins.legend.display === false) {
-    fsOpts.plugins.legend.display = false;
-  }
-
-  setTimeout(() => {
-    modalChart = new Chart(canvas, { type: srcType, data: srcData, options: fsOpts });
-  }, 80);
-}
-
-function closeChartModal() {
-  const modal = document.getElementById('chartModal');
-  if (modal) modal.classList.remove('active');
-  document.body.style.overflow = '';
-  if (modalChart) { modalChart.destroy(); modalChart = null; }
-}
-
-// Close on Escape key
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeChartModal(); });
 
 /* ========================================================
    NEWS
@@ -1652,6 +1559,9 @@ loadFluxoData();
 loadNews();
 loadCotacoes();
 loadWeather();
+
+/* Auto-refresh fluxo de pessoas a cada 5 minutos */
+setInterval(() => { loadFluxoData(); }, 5 * 60 * 1000);
 </script>
 </body>
 </html>
