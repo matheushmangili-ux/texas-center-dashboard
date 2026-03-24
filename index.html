@@ -405,7 +405,7 @@ tailwind.config={
   <section id="sec-tempo" class="page-section p-4 md:p-8 hidden">
     <div class="mb-6">
       <h2 class="text-lg font-black font-space text-dark tracking-tight">Previsão do Tempo</h2>
-      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Teresina, PI — próximos 3 dias via wttr.in</p>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Goiânia, GO — próximos 3 dias via wttr.in</p>
     </div>
     <div id="weatherContainer">
       <div class="flex items-center gap-2 text-dark/30 text-xs py-8 justify-center"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Carregando previsão...</div>
@@ -1562,7 +1562,7 @@ async function loadCotacoes() {
 async function loadWeather() {
   const el = document.getElementById('weatherContainer'); if (!el) return;
   try {
-    const r = await fetch('https://wttr.in/Teresina?format=j1');
+    const r = await fetch('https://wttr.in/Goiania?format=j1');
     const d = await r.json();
     const cur = d.current_condition[0];
     const forecast = d.weather; // 3 days
@@ -1597,7 +1597,7 @@ async function loadWeather() {
     html += '<div class="bg-dark rounded-2xl p-6 mb-4 text-white" style="box-shadow:0 8px 32px rgba(10,10,10,0.2)">' +
       '<div class="flex items-center justify-between">' +
       '<div>' +
-      '<p class="text-[9px] text-white/30 uppercase tracking-wider font-extrabold mb-1">Agora em Teresina</p>' +
+      '<p class="text-[9px] text-white/30 uppercase tracking-wider font-extrabold mb-1">Agora em Goiânia</p>' +
       '<p class="text-5xl font-black font-space">' + cur.temp_C + '°</p>' +
       '<p class="text-sm text-white/50 font-medium mt-1">' + cur.lang_pt[0].value + '</p>' +
       '</div>' +
