@@ -61,6 +61,9 @@ tailwind.config={
   @keyframes pulseBadge{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
   #ritmoStatus{animation:pulseBadge 2s ease-in-out infinite}
 
+  @keyframes pulseFrame{0%,100%{box-shadow:inset 0 0 0 2px var(--pulse-color,#ef4444),0 0 12px 0 var(--pulse-color,#ef4444)}50%{box-shadow:inset 0 0 0 3px var(--pulse-color,#ef4444),0 0 24px 4px var(--pulse-color,#ef4444)}}
+  .pulse-frame{animation:pulseFrame 2s ease-in-out infinite;border-radius:12px}
+
   .progress-bar-anim{transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
 
   #tblTeam tbody tr:hover, #tblComm tbody tr:hover{background:rgba(196,162,101,0.08);transition:background 0.2s ease}
@@ -160,6 +163,29 @@ tailwind.config={
     <div class="mb-5">
       <p class="text-[10px] text-dark/35 font-medium">Visão geral de metas e indicadores do mês</p>
     </div>
+    <!-- Meta Diária com Pulso de Ritmo -->
+    <div id="metaDiariaCard" class="pulse-frame bg-dark border border-white/10 rounded-xl p-5 mb-5 card-hover relative overflow-hidden" style="--pulse-color:#ef4444">
+      <div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl" id="metaDiariaBorderTop" style="background:linear-gradient(90deg,#ef4444,#dc2626)"></div>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-2">
+            <span id="metaDiariaIcon" class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center"><i class="fa-solid fa-bullseye text-red-400 text-sm"></i></span>
+            <div>
+              <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold">Meta Diária Necessária</p>
+              <p id="metaDiariaRitmoLabel" class="text-[9px] text-red-400 font-bold mt-0.5">---</p>
+            </div>
+          </div>
+          <p id="metaDiariaValor" class="text-3xl font-black font-space text-white tracking-tight">---</p>
+          <p id="metaDiariaSub" class="text-[10px] text-white/35 mt-1 font-medium">---</p>
+        </div>
+        <div class="border-l border-white/10 pl-4 sm:pl-6 min-w-[140px]">
+          <p class="text-[8px] text-white/40 uppercase tracking-[1.5px] font-extrabold mb-1">Vendido Hoje</p>
+          <p id="vendidoHojeValor" class="text-2xl font-black font-space text-green-400 tracking-tight">---</p>
+          <p id="vendidoHojeSub" class="text-[10px] text-white/35 mt-1 font-medium">---</p>
+        </div>
+      </div>
+    </div>
+
     <div id="kpiMain" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
     <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-5"></div>
 
@@ -188,7 +214,7 @@ tailwind.config={
         <div class="mt-3"><canvas id="chartFluxoCanal" style="max-height:150px"></canvas></div>
       </div>
       <div class="fluxo-card relative p-5">
-        <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo Dia Anterior</p>
+        <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo — Último Dia com Dados</p>
         <div id="fluxoDia" class="text-dark/30 text-xs">Carregando dados de fluxo...</div>
       </div>
     </div>
@@ -621,23 +647,42 @@ async function loadFluxoData() {
   const now = new Date();
   const monthStart = formatDateISO(new Date(now.getFullYear(), now.getMonth(), 1));
   const today = formatDateISO(now);
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = formatDateISO(yesterday);
-  const lyDate = new Date(yesterday);
-  lyDate.setFullYear(lyDate.getFullYear() - 1);
-  const lyDateStr = formatDateISO(lyDate);
 
   try {
-    const [monthRes, yesterdayRes, lyRes] = await Promise.allSettled([
-      fetchFluxo(monthStart, today),
-      fetchFluxo(yesterdayStr, yesterdayStr),
-      fetchFluxo(lyDateStr, lyDateStr)
-    ]);
+    /* 1. Dados mensais */
+    const monthRes = await fetchFluxo(monthStart, today).catch(() => null);
+
+    /* 2. Buscar última data com dados (tenta hoje, ontem, anteontem...) */
+    let lastDayData = null;
+    let lastDayDate = null;
+    for (let offset = 0; offset <= 5; offset++) {
+      const testDate = new Date(now);
+      testDate.setDate(testDate.getDate() - offset);
+      const testStr = formatDateISO(testDate);
+      try {
+        const res = await fetchFluxo(testStr, testStr);
+        if (res && res.resumo && res.resumo.total_pessoas > 0) {
+          lastDayData = res;
+          lastDayDate = testDate;
+          break;
+        }
+      } catch (e) { /* continua tentando */ }
+    }
+
+    /* 3. LY do mesmo dia encontrado */
+    let lyData = null;
+    let lyDate = null;
+    if (lastDayDate) {
+      lyDate = new Date(lastDayDate);
+      lyDate.setFullYear(lyDate.getFullYear() - 1);
+      lyData = await fetchFluxo(formatDateISO(lyDate), formatDateISO(lyDate)).catch(() => null);
+    }
+
     fluxoData = {
-      month: monthRes.status === 'fulfilled' ? monthRes.value : null,
-      yesterday: yesterdayRes.status === 'fulfilled' ? yesterdayRes.value : null,
-      ly: lyRes.status === 'fulfilled' ? lyRes.value : null,
+      month: monthRes,
+      yesterday: lastDayData,
+      yesterdayDate: lastDayDate,
+      ly: lyData,
       lyDate: lyDate
     };
     renderFluxo();
@@ -795,7 +840,7 @@ function renderFluxo() {
     dEl.innerHTML = `
       <div class="flex items-baseline gap-1 mb-3 flex-wrap">
         <span class="text-3xl font-black font-space text-dark">${ry.total_pessoas.toLocaleString('pt-BR')}</span>
-        <span class="text-xs text-dark/40 font-semibold">pessoas ontem</span>
+        <span class="text-xs text-dark/40 font-semibold">pessoas em ${fluxoData.yesterdayDate ? formatDateBR(fluxoData.yesterdayDate) : 'último dia'}</span>
         ${changeHTML}
       </div>
       <div class="grid grid-cols-3 gap-2">
@@ -977,6 +1022,9 @@ function renderKPIs(k) {
   /* Ritmo status no header */
   updateRitmoStatus(k.ritmo, ritmoIcon, rNorm);
 
+  /* Meta Diária card com pulso */
+  renderMetaDiariaCard(k, rNorm);
+
   const secEl = document.getElementById('kpiSec');
   if (secEl) {
     secEl.innerHTML = `
@@ -988,6 +1036,49 @@ function renderKPIs(k) {
       <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">P.U</p><p class="text-[15px] font-black font-space text-white">${k.pu || '---'}</p></div>
       <div class="kpi-card bg-dark border border-white/10 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-white/40 uppercase tracking-[1px] font-extrabold mb-1">P.A</p><p class="text-[15px] font-black font-space text-white">${k.pa || '---'}</p></div>`;
   }
+}
+
+/* ========================================================
+   META DIÁRIA CARD + PULSO
+   ======================================================== */
+function renderMetaDiariaCard(k, rNorm) {
+  const card = document.getElementById('metaDiariaCard');
+  const valor = document.getElementById('metaDiariaValor');
+  const sub = document.getElementById('metaDiariaSub');
+  const ritmoLabel = document.getElementById('metaDiariaRitmoLabel');
+  const iconEl = document.getElementById('metaDiariaIcon');
+  const borderTop = document.getElementById('metaDiariaBorderTop');
+  const vendidoValor = document.getElementById('vendidoHojeValor');
+  const vendidoSub = document.getElementById('vendidoHojeSub');
+  if (!card || !valor) return;
+
+  const isCrit = rNorm.includes('CRIT');
+  const isAten = rNorm.includes('ATEN');
+
+  /* Pulse color: red=critical, yellow=attention, green=on target */
+  let pulseColor, gradientColors, iconBg, iconColor, labelColor, labelText;
+  if (isCrit) {
+    pulseColor = '#ef4444'; gradientColors = '#ef4444,#dc2626'; iconBg = 'bg-red-500/20'; iconColor = 'text-red-400'; labelColor = 'text-red-400'; labelText = 'Ritmo Crítico';
+  } else if (isAten) {
+    pulseColor = '#eab308'; gradientColors = '#eab308,#ca8a04'; iconBg = 'bg-yellow-500/20'; iconColor = 'text-yellow-400'; labelColor = 'text-yellow-400'; labelText = 'Atenção — Acelerar';
+  } else {
+    pulseColor = '#22c55e'; gradientColors = '#22c55e,#16a34a'; iconBg = 'bg-green-500/20'; iconColor = 'text-green-400'; labelColor = 'text-green-400'; labelText = 'Na Meta — Manter Ritmo';
+  }
+
+  card.style.setProperty('--pulse-color', pulseColor);
+  if (borderTop) borderTop.style.background = 'linear-gradient(90deg,' + gradientColors + ')';
+  if (iconEl) iconEl.className = 'w-8 h-8 rounded-full ' + iconBg + ' flex items-center justify-center';
+  if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-bullseye ' + iconColor + ' text-sm"></i>';
+  if (ritmoLabel) { ritmoLabel.className = 'text-[9px] font-bold mt-0.5 ' + labelColor; ritmoLabel.textContent = labelText; }
+
+  valor.textContent = fK(k.metaDiaNec);
+  if (sub) sub.textContent = k.diasRest + ' dias restantes • Projeção: ' + fK(k.projecao);
+
+  /* Vendido Hoje — será alimentado via ERP (Data System) após integração */
+  const vendidoHoje = window.ERP_DATA?.vendidoHoje ?? 0;
+  if (vendidoValor) vendidoValor.textContent = vendidoHoje > 0 ? fK(vendidoHoje) : 'R$ 0,00';
+  const pctDia = k.metaDiaNec > 0 && vendidoHoje > 0 ? (vendidoHoje / k.metaDiaNec * 100) : 0;
+  if (vendidoSub) vendidoSub.textContent = vendidoHoje > 0 ? fP(pctDia) + ' da meta diária' : 'Aguardando integração ERP';
 }
 
 /* ========================================================
@@ -1549,6 +1640,109 @@ async function loadWeather() {
     console.error('Weather error:', e);
     el.innerHTML = '<p class="text-dark/30 text-xs text-center py-8"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar a previsão do tempo</p>';
   }
+}
+
+/* ========================================================
+   ERP DATA SYSTEM — INTEGRATION MODULE
+   ======================================================== *
+   * Este módulo prepara a integração com o ERP Data System.
+   * O dev responsável deve:
+   *   1. Configurar ERP_CONFIG.baseUrl com a URL da API do Data System
+   *   2. Configurar ERP_CONFIG.token com o token de autenticação
+   *   3. Mapear os endpoints corretos em ERP_ENDPOINTS
+   *   4. Chamar erpSync() após autenticação para popular os dados
+   *
+   * Após integração, window.ERP_DATA será populado e o dashboard
+   * atualizará automaticamente os campos que dependem do ERP.
+   */
+const ERP_CONFIG = {
+  baseUrl: '',       /* Ex: 'https://api.datasystem.com.br/v1' */
+  token: '',         /* Bearer token ou API key */
+  storeId: '',       /* ID da loja no Data System */
+  refreshInterval: 5 * 60 * 1000, /* 5 min */
+  enabled: false     /* Setar true quando configurado */
+};
+
+const ERP_ENDPOINTS = {
+  vendaDia:     '/vendas/dia',        /* GET - vendas do dia atual */
+  vendaMes:     '/vendas/mes',        /* GET - vendas do mês */
+  estoque:      '/estoque/resumo',    /* GET - resumo de estoque */
+  clientes:     '/clientes/dia',      /* GET - clientes atendidos no dia */
+  ticketMedio:  '/indicadores/ticket', /* GET - ticket médio */
+  metaDiaria:   '/metas/diaria',      /* GET - meta diária do ERP */
+  vendedores:   '/vendedores/ranking', /* GET - ranking vendedores */
+  produtos:     '/produtos/top',      /* GET - top produtos do dia */
+  setores:      '/setores/vendas',    /* GET - vendas por setor */
+};
+
+window.ERP_DATA = {
+  vendidoHoje: 0,
+  vendidoMes: 0,
+  ticketMedio: 0,
+  clientesDia: 0,
+  topProdutos: [],
+  vendedoresDia: [],
+  estoque: {},
+  lastSync: null
+};
+
+async function erpFetch(endpoint, params) {
+  if (!ERP_CONFIG.enabled || !ERP_CONFIG.baseUrl) return null;
+  const url = new URL(ERP_CONFIG.baseUrl + endpoint);
+  if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 10000);
+    const r = await fetch(url.toString(), {
+      signal: c.signal,
+      headers: {
+        'Authorization': 'Bearer ' + ERP_CONFIG.token,
+        'Content-Type': 'application/json',
+        'X-Store-Id': ERP_CONFIG.storeId
+      }
+    });
+    clearTimeout(t);
+    if (!r.ok) throw new Error('ERP HTTP ' + r.status);
+    return await r.json();
+  } catch (e) {
+    console.warn('[ERP] Fetch failed:', endpoint, e.message);
+    return null;
+  }
+}
+
+async function erpSync() {
+  if (!ERP_CONFIG.enabled) return;
+  console.log('[ERP] Syncing with Data System...');
+
+  const today = formatDateISO(new Date());
+  const [vendaDia, vendaMes, ticket] = await Promise.allSettled([
+    erpFetch(ERP_ENDPOINTS.vendaDia, {data: today, loja: ERP_CONFIG.storeId}),
+    erpFetch(ERP_ENDPOINTS.vendaMes, {loja: ERP_CONFIG.storeId}),
+    erpFetch(ERP_ENDPOINTS.ticketMedio, {data: today, loja: ERP_CONFIG.storeId})
+  ]);
+
+  if (vendaDia.status === 'fulfilled' && vendaDia.value) {
+    window.ERP_DATA.vendidoHoje = vendaDia.value.total || 0;
+    window.ERP_DATA.vendedoresDia = vendaDia.value.vendedores || [];
+  }
+  if (vendaMes.status === 'fulfilled' && vendaMes.value) {
+    window.ERP_DATA.vendidoMes = vendaMes.value.total || 0;
+  }
+  if (ticket.status === 'fulfilled' && ticket.value) {
+    window.ERP_DATA.ticketMedio = ticket.value.valor || 0;
+  }
+
+  window.ERP_DATA.lastSync = new Date().toISOString();
+  console.log('[ERP] Sync complete:', window.ERP_DATA);
+
+  /* Re-render KPIs com dados do ERP */
+  if (D.resumo) render();
+}
+
+/* Auto-sync ERP se habilitado */
+if (ERP_CONFIG.enabled) {
+  erpSync();
+  setInterval(erpSync, ERP_CONFIG.refreshInterval);
 }
 
 /* ========================================================
