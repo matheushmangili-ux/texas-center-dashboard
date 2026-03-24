@@ -90,6 +90,26 @@ tailwind.config={
   /* Section divider */
   .sec-divider{display:flex;align-items:center;gap:12px;font-size:10px;color:rgba(10,10,10,.35);text-transform:uppercase;letter-spacing:2px;font-weight:800;font-family:'Space Grotesk',sans-serif;margin-bottom:16px}
   .sec-divider span{flex:1;height:1px;background:rgba(10,10,10,.1)}
+
+  /* Fullscreen chart modal */
+  #chartModal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px}
+  #chartModal.active{display:flex}
+  #chartModalInner{background:#faf7f0;border-radius:16px;width:100%;max-width:95vw;max-height:90vh;overflow:hidden;animation:fadeIn .3s ease;position:relative}
+  #chartModalHeader{background:#0a0a0a;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+  #chartModalHeader span{font-size:13px;font-weight:700;color:#faf7f0;font-family:'Space Grotesk',sans-serif}
+  #chartModalClose{background:rgba(255,255,255,.1);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+  #chartModalClose:hover{background:rgba(255,255,255,.2)}
+  #chartModalBody{padding:20px;height:calc(90vh - 60px);max-height:calc(90vh - 60px)}
+  #chartModalBody canvas{width:100%!important;height:100%!important}
+  @media(max-width:768px){
+    #chartModal{padding:8px}
+    #chartModalInner{max-width:100%;max-height:95vh;border-radius:12px}
+    #chartModalBody{padding:12px;height:calc(95vh - 52px);max-height:calc(95vh - 52px)}
+    #chartModalHeader{padding:10px 16px}
+    #chartModalHeader span{font-size:11px}
+  }
+
+  .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 </head>
 <body class="font-inter text-dark min-h-screen antialiased">
@@ -225,30 +245,30 @@ tailwind.config={
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Progresso Semanal</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Meta vs Real</span></div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('sem','Progresso Semanal')">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Progresso Semanal</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Meta vs Real<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
         <div class="p-4"><div class="chart-box"><canvas id="chartSemanal"></canvas></div></div>
       </div>
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Ranking de Atingimento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">% da Meta</span></div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('rank','Ranking de Atingimento')">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Ranking de Atingimento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">% da Meta<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
         <div class="p-4"><div class="chart-box"><canvas id="chartRanking"></canvas></div></div>
       </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Evolução Acumulada</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Diário</span></div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('evo','Evolução Acumulada')">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Evolução Acumulada</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Diário<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
         <div class="p-4"><div class="chart-box"><canvas id="chartEvolucao"></canvas></div></div>
       </div>
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Mix por Departamento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Receita</span></div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('dep','Mix por Departamento')">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Mix por Departamento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Receita<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
         <div class="p-4"><div class="chart-box"><canvas id="chartDepto"></canvas></div></div>
       </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário</span></div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08);cursor:pointer" onclick="openChartModal('cat','Receita por Setor')">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário<i class="fa-solid fa-expand text-white/30 text-[9px] ml-2 hover:text-white/60 transition-colors"></i></span></div>
         <div class="p-4"><div class="chart-box"><canvas id="chartSetor"></canvas></div></div>
       </div>
       <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
@@ -342,11 +362,74 @@ tailwind.config={
     </div>
   </section>
 
+  <!-- ==================== NOTÍCIAS ==================== -->
+  <section id="sec-noticias" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Notícias do Dia</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Principais notícias do Brasil — Google News</p>
+    </div>
+    <div id="newsContainer" class="space-y-2">
+      <div class="flex items-center gap-2 text-dark/30 text-xs py-8 justify-center"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Carregando notícias...</div>
+    </div>
+  </section>
+
+  <!-- ==================== COTAÇÕES ==================== -->
+  <section id="sec-cotacoes" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Cotações</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Câmbio, soja e boi gordo — dados em tempo real</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <div class="sec-divider mb-4">Câmbio<span></span></div>
+        <div id="cotCambio" class="space-y-2">
+          <div class="flex items-center gap-2 text-dark/30 text-xs py-4 justify-center"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Carregando...</div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-divider mb-4">Agronegócio<span></span></div>
+        <div id="cotAgro" class="space-y-2">
+          <div class="flex items-center gap-2 text-dark/30 text-xs py-4 justify-center"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Carregando...</div>
+        </div>
+        <div class="mt-4">
+          <div class="sec-divider mb-4">Notícias Agro<span></span></div>
+          <div id="agroNews" class="space-y-2">
+            <div class="flex items-center gap-2 text-dark/30 text-xs py-4 justify-center"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Carregando...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PREVISÃO DO TEMPO ==================== -->
+  <section id="sec-tempo" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Previsão do Tempo</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Teresina, PI — próximos 3 dias via wttr.in</p>
+    </div>
+    <div id="weatherContainer">
+      <div class="flex items-center gap-2 text-dark/30 text-xs py-8 justify-center"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Carregando previsão...</div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="border-t border-dark/10 py-5 mx-4 md:mx-8 mt-4 text-center">
     <p class="font-orbitron text-[10px] font-black tracking-[3px] text-dark/20 uppercase">Texas Center</p>
     <p class="text-[8px] text-dark/15 mt-1 font-medium tracking-wider">Painel de Gestão Comercial — Dados sincronizados em tempo real</p>
   </footer>
+
+<!-- Chart Fullscreen Modal -->
+<div id="chartModal" onclick="if(event.target===this)closeChartModal()">
+  <div id="chartModalInner">
+    <div id="chartModalHeader">
+      <span id="chartModalTitle">Gráfico</span>
+      <button id="chartModalClose" onclick="closeChartModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="chartModalBody">
+      <canvas id="chartModalCanvas"></canvas>
+    </div>
+  </div>
+</div>
 
 </main>
 
@@ -370,7 +453,10 @@ const PAGES = [
   {id:'equipe', label:'Performance', icon:'fa-users'},
   {id:'graficos', label:'Gráficos', icon:'fa-chart-line'},
   {id:'comissao', label:'Comissão', icon:'fa-coins'},
-  {id:'frete', label:'Calculadora Frete', icon:'fa-truck-fast'}
+  {id:'frete', label:'Calculadora Frete', icon:'fa-truck-fast'},
+  {id:'noticias', label:'Notícias', icon:'fa-newspaper'},
+  {id:'cotacoes', label:'Cotações', icon:'fa-money-bill-trend-up'},
+  {id:'tempo', label:'Previsão do Tempo', icon:'fa-cloud-sun'}
 ];
 let currentPage = 'painel';
 
@@ -557,7 +643,7 @@ async function fetchS(gid) {
     try {
       const c2 = new AbortController();
       const t2 = setTimeout(() => c2.abort(), 10000);
-      const r2 = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {signal: c2.signal});
+      const r2 = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), {signal: c2.signal});
       clearTimeout(t2);
       if (!r2.ok) throw new Error(r2.status);
       return parseHTML(await r2.text());
@@ -580,7 +666,7 @@ async function fetchFluxo(startDate, endDate) {
     try {
       const c2 = new AbortController();
       const t2 = setTimeout(() => c2.abort(), 10000);
-      const r2 = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {signal: c2.signal});
+      const r2 = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), {signal: c2.signal});
       clearTimeout(t2);
       if (!r2.ok) throw new Error(r2.status);
       return await r2.json();
@@ -1283,10 +1369,265 @@ document.getElementById('cepDestino')?.addEventListener('input', function(e) {
 });
 
 /* ========================================================
+   FULLSCREEN CHART MODAL
+   ======================================================== */
+let modalChart = null;
+
+function openChartModal(chartKey, title) {
+  const modal = document.getElementById('chartModal');
+  const titleEl = document.getElementById('chartModalTitle');
+  const canvas = document.getElementById('chartModalCanvas');
+  if (!modal || !canvas) return;
+
+  titleEl.textContent = title || 'Gráfico';
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Get source chart config
+  const src = charts[chartKey];
+  if (!src) return;
+
+  // Clone the chart config
+  const cfg = JSON.parse(JSON.stringify(src.config));
+  // Adjust for fullscreen
+  if (cfg.options) {
+    cfg.options.maintainAspectRatio = false;
+    cfg.options.responsive = true;
+    if (cfg.options.plugins && cfg.options.plugins.legend && cfg.options.plugins.legend.labels) {
+      cfg.options.plugins.legend.labels.font = cfg.options.plugins.legend.labels.font || {};
+      cfg.options.plugins.legend.labels.font.size = 13;
+      cfg.options.plugins.legend.labels.padding = 16;
+    }
+    if (cfg.options.scales) {
+      Object.values(cfg.options.scales).forEach(s => {
+        if (s.ticks) { s.ticks.font = s.ticks.font || {}; s.ticks.font.size = 12; }
+      });
+    }
+  }
+
+  if (modalChart) modalChart.destroy();
+  setTimeout(() => {
+    modalChart = new Chart(canvas, cfg);
+  }, 50);
+}
+
+function closeChartModal() {
+  const modal = document.getElementById('chartModal');
+  if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
+  if (modalChart) { modalChart.destroy(); modalChart = null; }
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeChartModal(); });
+
+/* ========================================================
+   NEWS
+   ======================================================== */
+async function loadNews() {
+  const el = document.getElementById('newsContainer'); if (!el) return;
+  try {
+    const r = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419'));
+    const d = await r.json();
+    if (d.items && d.items.length > 0) {
+      el.innerHTML = d.items.slice(0, 12).map((item, i) => {
+        const date = new Date(item.pubDate);
+        const timeAgo = getTimeAgo(date);
+        return '<a href="' + item.link + '" target="_blank" rel="noopener" class="block bg-palha-50 border border-dark/5 rounded-xl p-4 hover:shadow-md hover:-translate-y-0.5 transition-all" style="animation:fadeIn .3s ease ' + (i * 0.05) + 's forwards;opacity:0">' +
+          '<div class="flex items-start gap-3">' +
+          '<div class="w-8 h-8 rounded-lg bg-dark/5 flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-newspaper text-dark/20 text-xs"></i></div>' +
+          '<div class="flex-1 min-w-0">' +
+          '<p class="text-[13px] font-bold text-dark leading-snug line-clamp-2">' + item.title.replace(/ - .*$/, '') + '</p>' +
+          '<div class="flex items-center gap-2 mt-1.5">' +
+          '<span class="text-[9px] text-dark/30 font-semibold">' + (item.title.match(/ - (.*)$/)?.[1] || 'Google News') + '</span>' +
+          '<span class="text-[8px] text-dark/20">•</span>' +
+          '<span class="text-[9px] text-dark/25">' + timeAgo + '</span>' +
+          '</div></div></div></a>';
+      }).join('');
+    } else {
+      el.innerHTML = '<p class="text-dark/30 text-xs text-center py-8"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nenhuma notícia disponível</p>';
+    }
+  } catch (e) {
+    console.error('News error:', e);
+    el.innerHTML = '<p class="text-dark/30 text-xs text-center py-8"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar notícias</p>';
+  }
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return Math.floor(diff / 60) + ' min atrás';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h atrás';
+  return Math.floor(diff / 86400) + 'd atrás';
+}
+
+/* ========================================================
+   COTAÇÕES (Câmbio + Agro News)
+   ======================================================== */
+async function loadCotacoes() {
+  // Câmbio
+  const cambioEl = document.getElementById('cotCambio');
+  try {
+    const r = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,BTC-BRL');
+    const d = await r.json();
+    if (cambioEl) {
+      const moedas = [
+        {key:'USDBRL', nome:'Dólar', icon:'fa-dollar-sign', color:'text-green-600'},
+        {key:'EURBRL', nome:'Euro', icon:'fa-euro-sign', color:'text-blue-600'},
+        {key:'BTCBRL', nome:'Bitcoin', icon:'fa-bitcoin-sign', color:'text-amber-600'}
+      ];
+      cambioEl.innerHTML = moedas.map(m => {
+        const c = d[m.key];
+        if (!c) return '';
+        const bid = parseFloat(c.bid);
+        const pctChange = parseFloat(c.pctChange);
+        const isUp = pctChange >= 0;
+        return '<div class="bg-palha-50 border border-dark/5 rounded-xl p-4 flex items-center gap-4" style="box-shadow:0 2px 12px rgba(124,92,62,0.06)">' +
+          '<div class="w-10 h-10 rounded-lg bg-dark flex items-center justify-center"><i class="fa-solid ' + m.icon + ' ' + m.color + ' text-sm"></i></div>' +
+          '<div class="flex-1">' +
+          '<p class="text-[9px] text-dark/30 uppercase tracking-wider font-extrabold">' + m.nome + ' (' + m.key.substring(0,3) + ')</p>' +
+          '<p class="text-xl font-black font-space text-dark">R$ ' + bid.toFixed(m.key === 'BTCBRL' ? 0 : 4) + '</p>' +
+          '</div>' +
+          '<div class="text-right">' +
+          '<span class="inline-flex items-center gap-1 text-[11px] font-bold ' + (isUp ? 'text-green-600' : 'text-red-600') + '">' +
+          '<i class="fa-solid fa-caret-' + (isUp ? 'up' : 'down') + '"></i>' + Math.abs(pctChange).toFixed(2) + '%</span>' +
+          '<p class="text-[8px] text-dark/25 mt-0.5">Máx: R$ ' + parseFloat(c.high).toFixed(m.key === 'BTCBRL' ? 0 : 4) + '</p>' +
+          '</div></div>';
+      }).join('');
+    }
+  } catch (e) {
+    if (cambioEl) cambioEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Erro ao carregar câmbio</p>';
+  }
+
+  // Agro news (soja, boi gordo)
+  const agroEl = document.getElementById('cotAgro');
+  const agroNewsEl = document.getElementById('agroNews');
+  try {
+    const r2 = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://news.google.com/rss/search?q=cotação+soja+boi+gordo+cepea&hl=pt-BR&gl=BR&ceid=BR:pt-419'));
+    const d2 = await r2.json();
+
+    if (agroEl) {
+      agroEl.innerHTML = '<div class="bg-palha-50 border border-dark/5 rounded-xl p-4" style="box-shadow:0 2px 12px rgba(124,92,62,0.06)">' +
+        '<div class="flex items-center gap-3 mb-3">' +
+        '<div class="w-10 h-10 rounded-lg bg-dark flex items-center justify-center"><i class="fa-solid fa-wheat-awn text-amber-400 text-sm"></i></div>' +
+        '<div><p class="text-[9px] text-dark/30 uppercase tracking-wider font-extrabold">Soja & Boi Gordo</p>' +
+        '<p class="text-[10px] text-dark/40 font-medium">Cotações via notícias CEPEA/B3</p></div>' +
+        '</div>' +
+        '<p class="text-[9px] text-dark/35 leading-relaxed">As cotações de soja e boi gordo são atualizadas diariamente pelo CEPEA/ESALQ. Acompanhe as últimas notícias abaixo para valores atualizados.</p>' +
+        '</div>';
+    }
+
+    if (d2.items && d2.items.length > 0 && agroNewsEl) {
+      agroNewsEl.innerHTML = d2.items.slice(0, 6).map((item, i) => {
+        const date = new Date(item.pubDate);
+        return '<a href="' + item.link + '" target="_blank" rel="noopener" class="block bg-palha-50 border border-dark/5 rounded-lg p-3 hover:shadow-sm transition-all" style="animation:fadeIn .3s ease ' + (i * 0.05) + 's forwards;opacity:0">' +
+          '<p class="text-[11px] font-bold text-dark leading-snug line-clamp-2">' + item.title.replace(/ - .*$/, '') + '</p>' +
+          '<p class="text-[8px] text-dark/25 mt-1">' + (item.title.match(/ - (.*)$/)?.[1] || '') + ' • ' + getTimeAgo(date) + '</p>' +
+          '</a>';
+      }).join('');
+    }
+  } catch (e) {
+    if (agroEl) agroEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Erro ao carregar cotações agro</p>';
+  }
+}
+
+/* ========================================================
+   WEATHER
+   ======================================================== */
+async function loadWeather() {
+  const el = document.getElementById('weatherContainer'); if (!el) return;
+  try {
+    const r = await fetch('https://wttr.in/Teresina?format=j1');
+    const d = await r.json();
+    const cur = d.current_condition[0];
+    const forecast = d.weather; // 3 days
+
+    const weatherIcons = {
+      'Sunny': 'fa-sun text-amber-400',
+      'Clear': 'fa-moon text-blue-300',
+      'Partly cloudy': 'fa-cloud-sun text-amber-300',
+      'Partly Cloudy': 'fa-cloud-sun text-amber-300',
+      'Cloudy': 'fa-cloud text-gray-400',
+      'Overcast': 'fa-cloud text-gray-500',
+      'Light rain': 'fa-cloud-rain text-blue-400',
+      'Moderate rain': 'fa-cloud-showers-heavy text-blue-500',
+      'Heavy rain': 'fa-cloud-showers-heavy text-blue-600',
+      'Patchy rain possible': 'fa-cloud-sun-rain text-blue-300',
+      'Patchy rain nearby': 'fa-cloud-sun-rain text-blue-300',
+      'Light drizzle': 'fa-cloud-rain text-blue-300',
+      'Thundery outbreaks possible': 'fa-bolt text-amber-500',
+      'Mist': 'fa-smog text-gray-400',
+      'Fog': 'fa-smog text-gray-500'
+    };
+
+    function getWeatherIcon(desc) {
+      return weatherIcons[desc] || 'fa-cloud text-gray-400';
+    }
+
+    const days = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+    let html = '';
+
+    // Current weather card
+    html += '<div class="bg-dark rounded-2xl p-6 mb-4 text-white" style="box-shadow:0 8px 32px rgba(10,10,10,0.2)">' +
+      '<div class="flex items-center justify-between">' +
+      '<div>' +
+      '<p class="text-[9px] text-white/30 uppercase tracking-wider font-extrabold mb-1">Agora em Teresina</p>' +
+      '<p class="text-5xl font-black font-space">' + cur.temp_C + '°</p>' +
+      '<p class="text-sm text-white/50 font-medium mt-1">' + cur.lang_pt[0].value + '</p>' +
+      '</div>' +
+      '<div class="text-right">' +
+      '<i class="fa-solid ' + getWeatherIcon(cur.weatherDesc[0].value) + ' text-5xl mb-2"></i>' +
+      '<div class="space-y-0.5 text-[10px] text-white/40">' +
+      '<p><i class="fa-solid fa-droplet mr-1"></i>' + cur.humidity + '% umidade</p>' +
+      '<p><i class="fa-solid fa-wind mr-1"></i>' + cur.windspeedKmph + ' km/h</p>' +
+      '<p><i class="fa-solid fa-temperature-half mr-1"></i>Sensação ' + cur.FeelsLikeC + '°</p>' +
+      '</div></div></div></div>';
+
+    // Forecast cards
+    html += '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">';
+    forecast.forEach((day, i) => {
+      const date = new Date(day.date);
+      const dayName = i === 0 ? 'Hoje' : i === 1 ? 'Amanhã' : days[date.getDay()];
+      const dateStr = String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0');
+      const hourly = day.hourly || [];
+      const avgDesc = hourly.length > 0 ? hourly[Math.floor(hourly.length/2)] : {};
+      const desc = avgDesc.lang_pt?.[0]?.value || day.hourly?.[4]?.lang_pt?.[0]?.value || '';
+      const icon = getWeatherIcon(avgDesc.weatherDesc?.[0]?.value || '');
+      const chanceRain = Math.max(...hourly.map(h => parseInt(h.chanceofrain) || 0));
+
+      html += '<div class="bg-palha-50 border border-dark/5 rounded-xl p-4 text-center" style="box-shadow:0 2px 12px rgba(124,92,62,0.06)">' +
+        '<p class="text-[10px] text-dark/30 uppercase tracking-wider font-extrabold">' + dayName + '</p>' +
+        '<p class="text-[9px] text-dark/20 mb-2">' + dateStr + '</p>' +
+        '<i class="fa-solid ' + icon + ' text-3xl mb-2"></i>' +
+        '<p class="text-[10px] text-dark/40 font-medium mb-2 h-8 line-clamp-2">' + desc + '</p>' +
+        '<div class="flex items-center justify-center gap-3">' +
+        '<span class="text-lg font-black font-space text-red-500">' + day.maxtempC + '°</span>' +
+        '<span class="text-sm font-bold font-space text-blue-400">' + day.mintempC + '°</span>' +
+        '</div>' +
+        '<div class="mt-2 flex items-center justify-center gap-2 text-[9px] text-dark/30">' +
+        '<span><i class="fa-solid fa-droplet mr-0.5 text-blue-400"></i>' + chanceRain + '% chuva</span>' +
+        '<span><i class="fa-solid fa-wind mr-0.5"></i>' + (avgDesc.windspeedKmph || '?') + ' km/h</span>' +
+        '</div></div>';
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+  } catch (e) {
+    console.error('Weather error:', e);
+    el.innerHTML = '<p class="text-dark/30 text-xs text-center py-8"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar a previsão do tempo</p>';
+  }
+}
+
+/* ========================================================
    INITIALIZATION
    ======================================================== */
 loadAllData();
 loadFluxoData();
+loadNews();
+loadCotacoes();
+loadWeather();
 </script>
 </body>
 </html>
