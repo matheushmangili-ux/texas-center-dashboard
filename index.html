@@ -35,63 +35,54 @@ tailwind.config={
 }
 </script>
 <style>
-  /* Background & global styles */
   body{background:#ffffff}
 
-  /* Keyframes */
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   @keyframes loadBar{0%{width:0}50%{width:70%}100%{width:100%}}
   @keyframes pulseSync{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
-  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-
-  /* Heatmap cells */
   .hm-cell{border-radius:4px;padding:4px 2px;font-weight:700;font-size:8px;text-align:center;transition:transform .15s}
   .hm-cell:hover{transform:scale(1.15)}
 
-  /* Chart box */
   .chart-box{position:relative;width:100%;height:280px}
   @media(max-width:768px){.chart-box{height:220px}}
 
-  /* Scrollbar */
   ::-webkit-scrollbar{width:4px;height:4px}
   ::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
 
-  /* Scroll reveal animation */
-  .scroll-reveal{opacity:0;transform:translateY(20px);transition:all 0.6s cubic-bezier(0.16,1,0.3,1)}
-  .scroll-reveal.revealed{opacity:1;transform:translateY(0)}
-
-  /* Card hover effect */
   .card-hover{transition:all 0.3s cubic-bezier(0.16,1,0.3,1)}
   .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(124,92,62,0.12)}
 
-  /* KPI accent bar */
   .kpi-card{position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(124,92,62,0.08)}
   .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
 
-  /* Pulse sync dot */
   .sync-dot{animation:pulseSync 2s ease-in-out infinite}
 
-  /* Chart slide-in */
-  .chart-slide{opacity:0;transform:translateY(30px);transition:all 0.7s cubic-bezier(0.16,1,0.3,1)}
-  .chart-slide.revealed{opacity:1;transform:translateY(0)}
-
-  /* Progress bar animation */
   .progress-bar-anim{transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
 
-  /* Table row hover */
   #tblTeam tbody tr:hover, #tblComm tbody tr:hover{background:rgba(196,162,101,0.08);transition:background 0.2s ease}
 
-  /* Section title (DM Sans) */
-  .section-title{font-family:"DM Sans",sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;letter-spacing:1px;opacity:0.7}
-
-  /* Loading bar */
   .loading-bar{height:3px;background:linear-gradient(90deg,#c4a265,#8b7348,#c4a265);background-size:200% 100%;border-radius:2px;animation:loadBar 2s ease-in-out infinite}
 
-  /* Fluxo card */
   .fluxo-card{background:#faf7f0;border:1px solid rgba(10,10,10,0.05);border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(124,92,62,0.08)}
   .fluxo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
+
+  /* Sidebar nav */
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s ease;font-family:'DM Sans',sans-serif;user-select:none}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
+  .nav-item.active{background:rgba(196,162,101,.18);color:#c4a265;font-weight:700}
+  .nav-item.active i{color:#c4a265}
+  .nav-item i{width:18px;text-align:center;font-size:13px;color:rgba(255,255,255,.3);transition:color .2s}
+  .nav-item:hover i{color:rgba(255,255,255,.6)}
+
+  /* Page section animation */
+  .page-section{animation:fadeIn 0.3s ease}
+  .page-section.hidden{display:none!important}
+
+  /* Section divider */
+  .sec-divider{display:flex;align-items:center;gap:12px;font-size:10px;color:rgba(10,10,10,.35);text-transform:uppercase;letter-spacing:2px;font-weight:800;font-family:'Space Grotesk',sans-serif;margin-bottom:16px}
+  .sec-divider span{flex:1;height:1px;background:rgba(10,10,10,.1)}
 </style>
 </head>
 <body class="font-inter text-dark min-h-screen antialiased">
@@ -105,42 +96,62 @@ tailwind.config={
   <p class="text-xs font-semibold tracking-[2px] uppercase text-dark/30">Sincronizando dados...</p>
 </div>
 
-<div class="relative z-10 max-w-[1480px] mx-auto px-4 md:px-8">
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed left-0 top-0 bottom-0 w-56 bg-dark flex flex-col z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+  <!-- Logo -->
+  <div class="px-5 pt-6 pb-5 border-b border-white/10">
+    <h1 class="font-orbitron text-sm font-black tracking-[2px] text-palha-50 uppercase">Texas Center</h1>
+    <p class="text-[8px] text-white/20 mt-1.5 font-space font-semibold tracking-[1.5px] uppercase">Dashboard de Metas — <span id="headerMonth"></span></p>
+  </div>
 
-  <!-- Header -->
-  <header class="flex flex-col sm:flex-row sm:items-end justify-between py-5 border-b-2 border-dark mb-6 gap-3">
-    <div>
-      <h1 class="font-orbitron text-xl sm:text-2xl font-black tracking-[2px] uppercase text-dark">TEXAS CENTER</h1>
-      <p class="text-[10px] text-dark/40 mt-1 font-space font-semibold tracking-[1.5px] uppercase">Dashboard de Metas — <span id="headerMonth"></span></p>
+  <!-- Navigation -->
+  <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto" id="sideNav"></nav>
+
+  <!-- Sync footer -->
+  <div class="px-4 py-4 border-t border-white/10">
+    <div class="flex items-center gap-1.5 text-[9px] text-white/30 font-medium mb-3">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-500 sync-dot"></span>
+      <span id="syncLabel">Conectando...</span>
     </div>
-    <div class="flex items-center gap-3">
-      <div class="text-[10px] text-dark/40 font-medium flex items-center gap-1.5">
-        <span class="w-1.5 h-1.5 rounded-full bg-green-600 sync-dot"></span>
-        <span id="syncLabel">Conectando...</span>
-      </div>
-      <button onclick="loadAllData()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold font-space tracking-wide bg-dark text-palha-50 border-2 border-dark hover:bg-transparent hover:text-dark transition-all min-h-[44px]">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
-        Sincronizar
-      </button>
-    </div>
-  </header>
+    <button onclick="loadAllData()" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold font-space tracking-wide bg-white/10 text-palha-50 hover:bg-white/15 transition-all">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+      Sincronizar
+    </button>
+  </div>
+</aside>
+
+<!-- Mobile overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- Mobile hamburger -->
+<button id="menuBtn" onclick="toggleSidebar()" class="fixed top-4 left-4 z-50 lg:hidden w-10 h-10 rounded-lg bg-dark text-palha-50 flex items-center justify-center shadow-lg hover:bg-dark2 transition-colors">
+  <i class="fa-solid fa-bars text-sm"></i>
+</button>
+
+<!-- Main Content -->
+<main class="lg:ml-56 min-h-screen transition-all">
 
   <!-- Error Banner -->
-  <div id="errorBanner" class="hidden bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 text-red-600 text-xs font-medium"></div>
+  <div id="errorBanner" class="hidden bg-red-50 border border-red-200 rounded-lg px-4 py-3 mx-4 md:mx-8 mt-4 text-red-600 text-xs font-medium"></div>
 
-  <!-- KPIs Primarios -->
-  <div id="kpiMain" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5 scroll-reveal"></div>
+  <!-- ==================== PAINEL GERAL ==================== -->
+  <section id="sec-painel" class="page-section p-4 md:p-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-lg font-black font-space text-dark tracking-tight">Painel Geral</h2>
+        <p class="text-[10px] text-dark/35 font-medium mt-0.5">Visão geral de metas e indicadores do mês</p>
+      </div>
+    </div>
+    <div id="kpiMain" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5"></div>
+    <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"></div>
+  </section>
 
-  <!-- KPIs Secundarios -->
-  <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-7 scroll-reveal"></div>
-
-  <!-- Fluxo da Loja -->
-  <div id="fluxoSection" class="mb-8 scroll-reveal">
-    <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4">
-      <span class="flex-1 h-px bg-dark/10"></span>
-      Fluxo da Loja
-      <span class="flex-1 h-px bg-dark/10"></span>
-    </p>
+  <!-- ==================== FLUXO DA LOJA ==================== -->
+  <section id="sec-fluxo" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Fluxo da Loja</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Movimentação mensal e comparativo com mesmo dia do ano anterior</p>
+    </div>
     <div id="fluxoCards" class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div class="fluxo-card relative p-5">
         <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo Mensal</p>
@@ -152,170 +163,176 @@ tailwind.config={
         <div id="fluxoDia" class="text-dark/30 text-xs">Carregando dados de fluxo...</div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Performance da Equipe (tabela unificada) -->
-  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
-    <span class="flex-1 h-px bg-dark/10"></span>
-    Performance da Equipe
-    <span class="flex-1 h-px bg-dark/10"></span>
-  </p>
-  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-    <div class="overflow-x-auto">
-      <table class="w-full text-xs border-collapse" id="tblTeam">
-        <thead><tr class="bg-dark text-palha-50">
-          <th class="px-2 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider whitespace-nowrap w-10"></th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Realizado</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap min-w-[130px]">Atingimento</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Gap</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Projeção</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Comissão Est.</th>
-        </tr></thead>
-        <tbody id="teamBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Filtros -->
-  <div class="flex flex-wrap gap-3 items-center mb-5 scroll-reveal">
-    <label class="text-[9px] text-dark/40 font-extrabold uppercase tracking-wider">Vendedor</label>
-    <select id="fVendedor" onchange="applyFilters()" class="bg-palha-50 text-dark border border-dark/10 rounded-lg px-3 py-2 text-[11px] font-medium outline-none focus:border-palha-400 min-h-[44px]"><option value="todos">Todos</option></select>
-    <label class="text-[9px] text-dark/40 font-extrabold uppercase tracking-wider ml-1">Semana</label>
-    <select id="fSemana" onchange="applyFilters()" class="bg-palha-50 text-dark border border-dark/10 rounded-lg px-3 py-2 text-[11px] font-medium outline-none focus:border-palha-400 min-h-[44px]">
-      <option value="todas">Todas</option><option value="1">Semana 1</option><option value="2">Semana 2</option><option value="3">Semana 3</option><option value="4">Semana 4</option>
-    </select>
-  </div>
-
-  <!-- Charts Row 1 -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3 scroll-reveal">
-    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Progresso Semanal</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Meta vs Real</span></div>
-      <div class="p-4"><div class="chart-box"><canvas id="chartSemanal"></canvas></div></div>
-    </div>
-    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Ranking de Atingimento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">% da Meta</span></div>
-      <div class="p-4"><div class="chart-box"><canvas id="chartRanking"></canvas></div></div>
-    </div>
-  </div>
-
-  <!-- Charts Row 2 -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3 scroll-reveal">
-    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Evolução Acumulada</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Diário</span></div>
-      <div class="p-4"><div class="chart-box"><canvas id="chartEvolucao"></canvas></div></div>
-    </div>
-    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Mix por Departamento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Receita</span></div>
-      <div class="p-4"><div class="chart-box"><canvas id="chartDepto"></canvas></div></div>
-    </div>
-  </div>
-
-  <!-- Charts Row 3 -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3 scroll-reveal">
-    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário</span></div>
-      <div class="p-4"><div class="chart-box"><canvas id="chartSetor"></canvas></div></div>
-    </div>
-    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Heatmap de Vendas</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Vendedor x Dia</span></div>
-      <div class="p-4 overflow-x-auto" id="heatmapBox"></div>
-    </div>
-  </div>
-
-
-  <!-- Tabela Comissão -->
-  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
-    <span class="flex-1 h-px bg-dark/10"></span>
-    Comissionamento Consolidado
-    <span class="flex-1 h-px bg-dark/10"></span>
-  </p>
-  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-    <div class="overflow-x-auto">
-      <table class="w-full text-xs border-collapse" id="tblComm">
-        <thead><tr class="bg-dark text-palha-50">
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 1</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 2</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 3</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 4</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Total</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">% Atingido</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Faixa</th>
-          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
-        </tr></thead>
-        <tbody id="commBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Calculadora de Frete (Melhor Envio Sandbox) -->
-  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
-    <span class="flex-1 h-px bg-dark/10"></span>
-    Calculadora de Frete
-    <span class="flex-1 h-px bg-dark/10"></span>
-  </p>
-  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
-      <!-- Form -->
-      <div class="p-5 border-b md:border-b-0 md:border-r border-dark/5">
-        <p class="text-[9px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-4 font-dm">Dados do Envio</p>
-        <div class="space-y-3">
-          <div>
-            <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">CEP Destino</label>
-            <input type="text" id="cepDestino" placeholder="00000-000" maxlength="9" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <div>
-              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Peso (kg)</label>
-              <input type="number" id="fretePeso" value="1.0" step="0.1" min="0.1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
-            </div>
-            <div>
-              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Altura (cm)</label>
-              <input type="number" id="freteAltura" value="20" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
-            </div>
-            <div>
-              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Largura (cm)</label>
-              <input type="number" id="freteLargura" value="30" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Comprimento (cm)</label>
-              <input type="number" id="freteComp" value="40" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
-            </div>
-            <div>
-              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Valor Declarado (R$)</label>
-              <input type="number" id="freteValor" value="100" min="0" step="0.01" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
-            </div>
-          </div>
-          <button onclick="calcularFrete()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-[11px] font-bold font-space tracking-wide bg-dark text-palha-50 border-2 border-dark hover:bg-transparent hover:text-dark transition-all min-h-[44px]">
-            <i class="fa-solid fa-truck-fast"></i>
-            Calcular Frete
-          </button>
-        </div>
+  <!-- ==================== PERFORMANCE DA EQUIPE ==================== -->
+  <section id="sec-equipe" class="page-section p-4 md:p-8 hidden">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+      <div>
+        <h2 class="text-lg font-black font-space text-dark tracking-tight">Performance da Equipe</h2>
+        <p class="text-[10px] text-dark/35 font-medium mt-0.5">Atingimento individual de metas, projeção e comissão estimada</p>
       </div>
-      <!-- Results -->
-      <div class="p-5">
-        <p class="text-[9px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-4 font-dm">Opções de Envio</p>
-        <div id="freteResultados" class="text-dark/40 text-xs">
-          <div class="flex flex-col items-center justify-center py-8 text-center">
-            <i class="fa-solid fa-truck text-3xl text-dark/10 mb-3"></i>
-            <p class="text-[11px] text-dark/30">Informe o CEP de destino para consultar opções de envio</p>
-          </div>
-        </div>
+      <div class="flex flex-wrap gap-3 items-center">
+        <label class="text-[9px] text-dark/40 font-extrabold uppercase tracking-wider">Vendedor</label>
+        <select id="fVendedor" onchange="applyFilters()" class="bg-palha-50 text-dark border border-dark/10 rounded-lg px-3 py-2 text-[11px] font-medium outline-none focus:border-palha-400 min-h-[40px]"><option value="todos">Todos</option></select>
+        <label class="text-[9px] text-dark/40 font-extrabold uppercase tracking-wider ml-1">Semana</label>
+        <select id="fSemana" onchange="applyFilters()" class="bg-palha-50 text-dark border border-dark/10 rounded-lg px-3 py-2 text-[11px] font-medium outline-none focus:border-palha-400 min-h-[40px]">
+          <option value="todas">Todas</option><option value="1">Semana 1</option><option value="2">Semana 2</option><option value="3">Semana 3</option><option value="4">Semana 4</option>
+        </select>
       </div>
     </div>
-  </div>
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs border-collapse" id="tblTeam">
+          <thead><tr class="bg-dark text-palha-50">
+            <th class="px-2 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider whitespace-nowrap w-10"></th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Realizado</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap min-w-[130px]">Atingimento</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Gap</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Projeção</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Comissão Est.</th>
+          </tr></thead>
+          <tbody id="teamBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GRÁFICOS ==================== -->
+  <section id="sec-graficos" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Gráficos</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Visualizações de progresso semanal, ranking, evolução e mix de vendas</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Progresso Semanal</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Meta vs Real</span></div>
+        <div class="p-4"><div class="chart-box"><canvas id="chartSemanal"></canvas></div></div>
+      </div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Ranking de Atingimento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">% da Meta</span></div>
+        <div class="p-4"><div class="chart-box"><canvas id="chartRanking"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Evolução Acumulada</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Diário</span></div>
+        <div class="p-4"><div class="chart-box"><canvas id="chartEvolucao"></canvas></div></div>
+      </div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Mix por Departamento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Receita</span></div>
+        <div class="p-4"><div class="chart-box"><canvas id="chartDepto"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário</span></div>
+        <div class="p-4"><div class="chart-box"><canvas id="chartSetor"></canvas></div></div>
+      </div>
+      <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+        <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Heatmap de Vendas</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Vendedor x Dia</span></div>
+        <div class="p-4 overflow-x-auto" id="heatmapBox"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== COMISSÃO ==================== -->
+  <section id="sec-comissao" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Comissionamento</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Comissão consolidada por semana, faixa de atingimento e status</p>
+    </div>
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs border-collapse" id="tblComm">
+          <thead><tr class="bg-dark text-palha-50">
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 1</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 2</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 3</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 4</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Total</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">% Atingido</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Faixa</th>
+            <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
+          </tr></thead>
+          <tbody id="commBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CALCULADORA DE FRETE ==================== -->
+  <section id="sec-frete" class="page-section p-4 md:p-8 hidden">
+    <div class="mb-6">
+      <h2 class="text-lg font-black font-space text-dark tracking-tight">Calculadora de Frete</h2>
+      <p class="text-[10px] text-dark/35 font-medium mt-0.5">Consulta de valores e prazos via Melhor Envio (Sandbox)</p>
+    </div>
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+        <div class="p-5 border-b md:border-b-0 md:border-r border-dark/5">
+          <p class="text-[9px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-4 font-dm">Dados do Envio</p>
+          <div class="space-y-3">
+            <div>
+              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">CEP Destino</label>
+              <input type="text" id="cepDestino" placeholder="00000-000" maxlength="9" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Peso (kg)</label>
+                <input type="number" id="fretePeso" value="1.0" step="0.1" min="0.1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+              </div>
+              <div>
+                <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Altura (cm)</label>
+                <input type="number" id="freteAltura" value="20" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+              </div>
+              <div>
+                <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Largura (cm)</label>
+                <input type="number" id="freteLargura" value="30" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Comprimento (cm)</label>
+                <input type="number" id="freteComp" value="40" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+              </div>
+              <div>
+                <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Valor Declarado (R$)</label>
+                <input type="number" id="freteValor" value="100" min="0" step="0.01" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+              </div>
+            </div>
+            <button onclick="calcularFrete()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-[11px] font-bold font-space tracking-wide bg-dark text-palha-50 border-2 border-dark hover:bg-transparent hover:text-dark transition-all min-h-[44px]">
+              <i class="fa-solid fa-truck-fast"></i>
+              Calcular Frete
+            </button>
+          </div>
+        </div>
+        <div class="p-5">
+          <p class="text-[9px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-4 font-dm">Opções de Envio</p>
+          <div id="freteResultados" class="text-dark/40 text-xs">
+            <div class="flex flex-col items-center justify-center py-8 text-center">
+              <i class="fa-solid fa-truck text-3xl text-dark/10 mb-3"></i>
+              <p class="text-[11px] text-dark/30">Informe o CEP de destino para consultar opções de envio</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
-  <footer class="border-t border-dark/10 py-5 mt-10 text-center">
+  <footer class="border-t border-dark/10 py-5 mx-4 md:mx-8 mt-4 text-center">
     <p class="font-orbitron text-[10px] font-black tracking-[3px] text-dark/20 uppercase">Texas Center</p>
     <p class="text-[8px] text-dark/15 mt-1 font-medium tracking-wider">Painel de Gestão Comercial — Dados sincronizados em tempo real</p>
   </footer>
-</div>
+
+</main>
 
 <script>
 /* ========================================================
@@ -325,9 +342,62 @@ const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQlOZNO-XQ_cBlHMx9
 const GID = {resumo:'730516041', s1:'682400813', s2:'1603208091', s3:'1810708365', s4:'406858905', bd:'1063238094'};
 let D = {}, charts = {}, fluxoData = {};
 
-/* Melhor Envio Sandbox config */
 const ME_TOKEN = 'SEU_TOKEN_SANDBOX';
 const CEP_ORIGEM = '64000000';
+
+/* ========================================================
+   SIDEBAR & SPA NAVIGATION
+   ======================================================== */
+const PAGES = [
+  {id:'painel', label:'Painel Geral', icon:'fa-gauge-high'},
+  {id:'fluxo', label:'Fluxo da Loja', icon:'fa-people-arrows'},
+  {id:'equipe', label:'Performance', icon:'fa-users'},
+  {id:'graficos', label:'Gráficos', icon:'fa-chart-line'},
+  {id:'comissao', label:'Comissão', icon:'fa-coins'},
+  {id:'frete', label:'Calculadora Frete', icon:'fa-truck-fast'}
+];
+let currentPage = 'painel';
+
+function initSidebar() {
+  const nav = document.getElementById('sideNav');
+  if (!nav) return;
+  nav.innerHTML = PAGES.map(p =>
+    '<div class="nav-item' + (p.id === currentPage ? ' active' : '') + '" data-page="' + p.id + '" onclick="navigateTo(\'' + p.id + '\')">' +
+    '<i class="fa-solid ' + p.icon + '"></i><span>' + p.label + '</span></div>'
+  ).join('');
+}
+
+function navigateTo(pageId) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+  const sec = document.getElementById('sec-' + pageId);
+  if (sec) {
+    sec.classList.remove('hidden');
+    sec.style.animation = 'none';
+    sec.offsetHeight; /* trigger reflow */
+    sec.style.animation = 'fadeIn 0.3s ease';
+  }
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === pageId));
+  currentPage = pageId;
+  if (window.innerWidth < 1024) toggleSidebar();
+  window.scrollTo(0, 0);
+
+  /* Resize charts when navigating to graficos (they need visible container) */
+  if (pageId === 'graficos') {
+    setTimeout(() => {
+      Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
+    }, 150);
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  if (!sb || !ov) return;
+  sb.classList.toggle('-translate-x-full');
+  ov.classList.toggle('hidden');
+}
+
+initSidebar();
 
 /* ========================================================
    HEADER MONTH
@@ -386,7 +456,6 @@ function formatDateBR(d) {
   return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
 }
 
-/* Normalize accented text for comparison */
 function normAccent(s) {
   return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 }
@@ -406,7 +475,6 @@ function calcFaixa(pct) {
   return {taxa: 0.005, label: 'Ate 50% -> 0,50%'};
 }
 
-/* Cowboy mood icon for seller cards - always returns a valid object */
 function cowboyMood(pct) {
   if (pct >= 100) return {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', label:'Acima da Meta', badge:'bg-green-500/20 text-green-400', extra:'<i class="fa-solid fa-star text-[8px] text-yellow-400 absolute -top-0.5 -right-0.5"></i>'};
   if (pct >= 80) return {icon:'fa-hat-cowboy-side', bg:'bg-green-600', ring:'ring-green-400', label:'No Caminho', badge:'bg-green-500/20 text-green-400', extra:''};
@@ -437,25 +505,6 @@ function animateCounter(el, target, prefix, suffix, duration) {
     if (progress < 1) requestAnimationFrame(update);
   }
   requestAnimationFrame(update);
-}
-
-/* ========================================================
-   SCROLL REVEAL (IntersectionObserver)
-   ======================================================== */
-function initScrollReveal() {
-  if (typeof IntersectionObserver === 'undefined') {
-    document.querySelectorAll('.scroll-reveal, .chart-slide').forEach(el => el.classList.add('revealed'));
-    return;
-  }
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('revealed');
-        observer.unobserve(e.target);
-      }
-    });
-  }, {threshold: 0.1});
-  document.querySelectorAll('.scroll-reveal, .chart-slide').forEach(el => observer.observe(el));
 }
 
 /* ========================================================
@@ -508,19 +557,15 @@ async function fetchFluxo(startDate, endDate) {
 }
 
 /* ========================================================
-   FLUXO DATA LOADING - Compare yesterday vs same day LY
+   FLUXO DATA LOADING
    ======================================================== */
 async function loadFluxoData() {
   const now = new Date();
   const monthStart = formatDateISO(new Date(now.getFullYear(), now.getMonth(), 1));
   const today = formatDateISO(now);
-
-  /* Yesterday */
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = formatDateISO(yesterday);
-
-  /* Same date last year (LY) */
   const lyDate = new Date(yesterday);
   lyDate.setFullYear(lyDate.getFullYear() - 1);
   const lyDateStr = formatDateISO(lyDate);
@@ -531,27 +576,26 @@ async function loadFluxoData() {
       fetchFluxo(yesterdayStr, yesterdayStr),
       fetchFluxo(lyDateStr, lyDateStr)
     ]);
-
-    const monthData = monthRes.status === 'fulfilled' ? monthRes.value : null;
-    const yesterdayData = yesterdayRes.status === 'fulfilled' ? yesterdayRes.value : null;
-    const lyData = lyRes.status === 'fulfilled' ? lyRes.value : null;
-
-    fluxoData = {month: monthData, yesterday: yesterdayData, ly: lyData, lyDate: lyDate};
+    fluxoData = {
+      month: monthRes.status === 'fulfilled' ? monthRes.value : null,
+      yesterday: yesterdayRes.status === 'fulfilled' ? yesterdayRes.value : null,
+      ly: lyRes.status === 'fulfilled' ? lyRes.value : null,
+      lyDate: lyDate
+    };
     renderFluxo();
   } catch (e) {
     console.error('Fluxo load error:', e);
     const mEl = document.getElementById('fluxoMensal');
     const dEl = document.getElementById('fluxoDia');
-    if (mEl) mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nao foi possivel carregar dados de fluxo</p>';
-    if (dEl) dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nao foi possivel carregar dados de fluxo</p>';
+    if (mEl) mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar dados de fluxo</p>';
+    if (dEl) dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Não foi possível carregar dados de fluxo</p>';
   }
 }
 
 /* ========================================================
-   RENDER FLUXO SECTION
+   RENDER FLUXO
    ======================================================== */
 function renderFluxo() {
-  /* Monthly card */
   const mEl = document.getElementById('fluxoMensal');
   if (!mEl) return;
 
@@ -559,28 +603,15 @@ function renderFluxo() {
     const r = fluxoData.month.resumo;
     mEl.innerHTML = `
       <div class="flex items-baseline gap-2 mb-3">
-        <span class="text-3xl font-black font-space text-dark counter-fluxo-mes">${r.total_pessoas.toLocaleString('pt-BR')}</span>
+        <span class="text-3xl font-black font-space text-dark">${r.total_pessoas.toLocaleString('pt-BR')}</span>
         <span class="text-xs text-dark/40 font-semibold">pessoas no mês</span>
       </div>
       <div class="grid grid-cols-3 gap-2 mb-2">
-        <div class="text-center bg-blue-50 rounded-lg p-2">
-          <i class="fa-solid fa-person text-blue-600 text-sm"></i>
-          <p class="text-[13px] font-black font-space text-blue-700 mt-0.5">${r.total_homens.toLocaleString('pt-BR')}</p>
-          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Homens</p>
-        </div>
-        <div class="text-center bg-pink-50 rounded-lg p-2">
-          <i class="fa-solid fa-person-dress text-pink-600 text-sm"></i>
-          <p class="text-[13px] font-black font-space text-pink-700 mt-0.5">${r.total_mulheres.toLocaleString('pt-BR')}</p>
-          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Mulheres</p>
-        </div>
-        <div class="text-center bg-amber-50 rounded-lg p-2">
-          <i class="fa-solid fa-child text-amber-600 text-sm"></i>
-          <p class="text-[13px] font-black font-space text-amber-700 mt-0.5">${r.total_criancas.toLocaleString('pt-BR')}</p>
-          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Crianças</p>
-        </div>
+        <div class="text-center bg-blue-50 rounded-lg p-2"><i class="fa-solid fa-person text-blue-600 text-sm"></i><p class="text-[13px] font-black font-space text-blue-700 mt-0.5">${r.total_homens.toLocaleString('pt-BR')}</p><p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Homens</p></div>
+        <div class="text-center bg-pink-50 rounded-lg p-2"><i class="fa-solid fa-person-dress text-pink-600 text-sm"></i><p class="text-[13px] font-black font-space text-pink-700 mt-0.5">${r.total_mulheres.toLocaleString('pt-BR')}</p><p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Mulheres</p></div>
+        <div class="text-center bg-amber-50 rounded-lg p-2"><i class="fa-solid fa-child text-amber-600 text-sm"></i><p class="text-[13px] font-black font-space text-amber-700 mt-0.5">${r.total_criancas.toLocaleString('pt-BR')}</p><p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Crianças</p></div>
       </div>`;
 
-    /* Render canal chart */
     if (fluxoData.month.porCanal) {
       const pc = fluxoData.month.porCanal;
       const canalCtx = document.getElementById('chartFluxoCanal');
@@ -589,35 +620,15 @@ function renderFluxo() {
         const canalColors = ['#0a0a0a','#c4a265','#16a34a','#2563eb','#dc2626','#ca8a04','#9333ea','#ea580c','#0891b2','#db2777'];
         charts.fluxoCanal = new Chart(canalCtx, {
           type: 'bar',
-          data: {
-            labels: pc.labels.map(l => l.length > 15 ? l.substring(0, 14) + '...' : l),
-            datasets: [{
-              data: pc.totais,
-              backgroundColor: canalColors.map(c => c + '88'),
-              borderColor: canalColors,
-              borderWidth: 1,
-              borderRadius: 4,
-              barPercentage: 0.6
-            }]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => c.parsed.x + ' pessoas'}}},
-            scales: {
-              x: {grid: {color: 'rgba(0,0,0,.04)'}, ticks: {font: {size: 8}}},
-              y: {grid: {display: false}, ticks: {font: {size: 8, weight: 600}}}
-            }
-          }
+          data: { labels: pc.labels.map(l => l.length > 15 ? l.substring(0, 14) + '...' : l), datasets: [{ data: pc.totais, backgroundColor: canalColors.map(c => c + '88'), borderColor: canalColors, borderWidth: 1, borderRadius: 4, barPercentage: 0.6 }] },
+          options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => c.parsed.x + ' pessoas'}}}, scales: { x: {grid: {color: 'rgba(0,0,0,.04)'}, ticks: {font: {size: 8}}}, y: {grid: {display: false}, ticks: {font: {size: 8, weight: 600}}} } }
         });
       }
     }
   } else {
-    mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Dados mensais indisponiveis</p>';
+    mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Dados mensais indisponíveis</p>';
   }
 
-  /* Yesterday card - compare with same day Last Year */
   const dEl = document.getElementById('fluxoDia');
   if (!dEl) return;
 
@@ -632,12 +643,11 @@ function renderFluxo() {
       const isUp = change >= 0;
       const arrow = isUp ? '<i class="fa-solid fa-arrow-up text-green-600"></i>' : '<i class="fa-solid fa-arrow-down text-red-600"></i>';
       const changeColor = isUp ? 'text-green-600' : 'text-red-600';
-      changeHTML = `<span class="${changeColor} text-sm font-bold ml-2">${arrow} ${Math.abs(change).toFixed(1)}%</span>
-        <span class="text-[9px] text-dark/30 ml-1">vs Mesmo dia LY (${lyDateLabel}) — ${rly.total_pessoas}</span>`;
+      changeHTML = '<span class="' + changeColor + ' text-sm font-bold ml-2">' + arrow + ' ' + Math.abs(change).toFixed(1) + '%</span><span class="text-[9px] text-dark/30 ml-1">vs Mesmo dia LY (' + lyDateLabel + ') — ' + rly.total_pessoas + '</span>';
     } else if (rly) {
-      changeHTML = `<span class="text-dark/30 text-[9px] ml-2">Mesmo dia LY (${lyDateLabel}): 0 pessoas</span>`;
+      changeHTML = '<span class="text-dark/30 text-[9px] ml-2">Mesmo dia LY (' + lyDateLabel + '): 0 pessoas</span>';
     } else {
-      changeHTML = `<span class="text-dark/30 text-[9px] ml-2">Dados LY (${lyDateLabel}) indisponiveis</span>`;
+      changeHTML = '<span class="text-dark/30 text-[9px] ml-2">Dados LY (' + lyDateLabel + ') indisponíveis</span>';
     }
 
     dEl.innerHTML = `
@@ -647,24 +657,12 @@ function renderFluxo() {
         ${changeHTML}
       </div>
       <div class="grid grid-cols-3 gap-2">
-        <div class="text-center bg-blue-50 rounded-lg p-2">
-          <i class="fa-solid fa-person text-blue-600 text-sm"></i>
-          <p class="text-[13px] font-black font-space text-blue-700 mt-0.5">${ry.total_homens.toLocaleString('pt-BR')}</p>
-          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Homens</p>
-        </div>
-        <div class="text-center bg-pink-50 rounded-lg p-2">
-          <i class="fa-solid fa-person-dress text-pink-600 text-sm"></i>
-          <p class="text-[13px] font-black font-space text-pink-700 mt-0.5">${ry.total_mulheres.toLocaleString('pt-BR')}</p>
-          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Mulheres</p>
-        </div>
-        <div class="text-center bg-amber-50 rounded-lg p-2">
-          <i class="fa-solid fa-child text-amber-600 text-sm"></i>
-          <p class="text-[13px] font-black font-space text-amber-700 mt-0.5">${ry.total_criancas.toLocaleString('pt-BR')}</p>
-          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Crianças</p>
-        </div>
+        <div class="text-center bg-blue-50 rounded-lg p-2"><i class="fa-solid fa-person text-blue-600 text-sm"></i><p class="text-[13px] font-black font-space text-blue-700 mt-0.5">${ry.total_homens.toLocaleString('pt-BR')}</p><p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Homens</p></div>
+        <div class="text-center bg-pink-50 rounded-lg p-2"><i class="fa-solid fa-person-dress text-pink-600 text-sm"></i><p class="text-[13px] font-black font-space text-pink-700 mt-0.5">${ry.total_mulheres.toLocaleString('pt-BR')}</p><p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Mulheres</p></div>
+        <div class="text-center bg-amber-50 rounded-lg p-2"><i class="fa-solid fa-child text-amber-600 text-sm"></i><p class="text-[13px] font-black font-space text-amber-700 mt-0.5">${ry.total_criancas.toLocaleString('pt-BR')}</p><p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Crianças</p></div>
       </div>`;
   } else {
-    dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Dados do dia anterior indisponiveis</p>';
+    dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Dados do dia anterior indisponíveis</p>';
   }
 }
 
@@ -673,10 +671,7 @@ function renderFluxo() {
    ======================================================== */
 async function loadAllData() {
   const ld = document.getElementById('loading');
-  if (ld) {
-    ld.classList.remove('hidden');
-    ld.style.opacity = '1';
-  }
+  if (ld) { ld.classList.remove('hidden'); ld.style.opacity = '1'; }
 
   try {
     const [resumo, s1, s2, s3, s4, bd] = await Promise.all([
@@ -692,22 +687,10 @@ async function loadAllData() {
   } catch (e) {
     console.error(e);
     const b = document.getElementById('errorBanner');
-    if (b) {
-      b.classList.remove('hidden');
-      b.innerHTML = 'Falha na sincronização. Abra o <code>dashboard.html</code> direto no navegador.';
-    }
+    if (b) { b.classList.remove('hidden'); b.innerHTML = 'Falha na sincronização. Abra o <code>dashboard.html</code> direto no navegador.'; }
   }
 
-  /* Hide loading screen safely */
-  if (ld) {
-    ld.style.opacity = '0';
-    setTimeout(() => {
-      ld.classList.add('hidden');
-      ld.style.opacity = '1';
-    }, 500);
-  }
-
-  initScrollReveal();
+  if (ld) { ld.style.opacity = '0'; setTimeout(() => { ld.classList.add('hidden'); ld.style.opacity = '1'; }, 500); }
 }
 
 /* ========================================================
@@ -727,23 +710,11 @@ function getKPIs() {
     if (id === '19') { o.pu = row[8] || ''; o.pa = row[10] || ''; }
     if (id === '20') { o.ritmo = (row[9] || '').trim(); }
   }
-  /* Defaults for missing values */
-  o.metaS = o.metaS || [0,0,0,0];
-  o.realS = o.realS || [0,0,0,0];
-  o.pctS = o.pctS || [0,0,0,0];
-  o.ritmo = o.ritmo || '';
-  o.pctMes = o.pctMes || 0;
-  o.diffTotal = o.diffTotal || 0;
-  o.realMes = o.realMes || 0;
-  o.metaMes = o.metaMes || 0;
-  o.projecao = o.projecao || 0;
-  o.pctProj = o.pctProj || 0;
-  o.metaDiaNec = o.metaDiaNec || 0;
-  o.diasRest = o.diasRest || 0;
-  o.diasTrab = o.diasTrab || 0;
-  o.diasTot = o.diasTot || 0;
-  o.refLY = o.refLY || 0;
-  o.pctLY = o.pctLY || 0;
+  o.metaS = o.metaS || [0,0,0,0]; o.realS = o.realS || [0,0,0,0]; o.pctS = o.pctS || [0,0,0,0];
+  o.ritmo = o.ritmo || ''; o.pctMes = o.pctMes || 0; o.diffTotal = o.diffTotal || 0;
+  o.realMes = o.realMes || 0; o.metaMes = o.metaMes || 0; o.projecao = o.projecao || 0; o.pctProj = o.pctProj || 0;
+  o.metaDiaNec = o.metaDiaNec || 0; o.diasRest = o.diasRest || 0; o.diasTrab = o.diasTrab || 0; o.diasTot = o.diasTot || 0;
+  o.refLY = o.refLY || 0; o.pctLY = o.pctLY || 0;
   return o;
 }
 
@@ -754,12 +725,7 @@ function getRanking() {
     if ((r[1] || '').includes('RANKING INDIVIDUAL')) { inside = true; continue; }
     if (inside && (r[1] || '').includes('COMISSIONAMENTO')) break;
     if (inside && r[2] && r[3] && r[1] !== 'Rank' && r[2] !== 'Vendedor') {
-      out.push({
-        rank: r[1], nome: r[2], meta: pR(r[3]), real: pR(r[4]),
-        pct: pP(r[5]), gap: pR(r[6]), metaDia: pR(r[7]), proj: pR(r[8]),
-        pctProj: pP(r[9]), media: pR(r[10]), melhorDia: r[11] || '',
-        status: r[12] || '', isTotal: r[2].includes('TOTAL')
-      });
+      out.push({ rank: r[1], nome: r[2], meta: pR(r[3]), real: pR(r[4]), pct: pP(r[5]), gap: pR(r[6]), metaDia: pR(r[7]), proj: pR(r[8]), pctProj: pP(r[9]), media: pR(r[10]), melhorDia: r[11] || '', status: r[12] || '', isTotal: r[2].includes('TOTAL') });
     }
   }
   return out;
@@ -771,12 +737,7 @@ function getComm() {
   for (const r of D.resumo) {
     if ((r[1] || '').includes('COMISSIONAMENTO')) { inside = true; continue; }
     if (inside && r[1] && r[1] !== 'Vendedor') {
-      out.push({
-        nome: r[1], s1: r[2] || '', s2: r[3] || '', s3: r[4] || '',
-        s4: r[5] || '', total: r[6] || '', pct: r[7] || '',
-        faixa: (r[8] || '').replace(/&gt;/g, '>'), status: r[9] || '',
-        isTotal: r[1].includes('TOTAL')
-      });
+      out.push({ nome: r[1], s1: r[2] || '', s2: r[3] || '', s3: r[4] || '', s4: r[5] || '', total: r[6] || '', pct: r[7] || '', faixa: (r[8] || '').replace(/&gt;/g, '>'), status: r[9] || '', isTotal: r[1].includes('TOTAL') });
     }
   }
   return out;
@@ -784,19 +745,11 @@ function getComm() {
 
 function getSellerWeekly(nome) {
   const weeks = [D.s1, D.s2, D.s3, D.s4];
-  return weeks.map(sem => {
-    for (const r of sem) {
-      if ((r[2] || '').trim() === nome) return {meta: pR(r[3]), real: pR(r[10]), pct: pP(r[12])};
-    }
-    return {meta: 0, real: 0, pct: 0};
-  });
+  return weeks.map(sem => { for (const r of sem) { if ((r[2] || '').trim() === nome) return {meta: pR(r[3]), real: pR(r[10]), pct: pP(r[12])}; } return {meta: 0, real: 0, pct: 0}; });
 }
 
 function getDaily() {
-  return [
-    {n:'S1', d:parseSem(D.s1)}, {n:'S2', d:parseSem(D.s2)},
-    {n:'S3', d:parseSem(D.s3)}, {n:'S4', d:parseSem(D.s4)}
-  ];
+  return [{n:'S1', d:parseSem(D.s1)}, {n:'S2', d:parseSem(D.s2)}, {n:'S3', d:parseSem(D.s3)}, {n:'S4', d:parseSem(D.s4)}];
 }
 
 function parseSem(rows) {
@@ -805,26 +758,14 @@ function parseSem(rows) {
     if (!r[2] || r[2] === 'Vendedor' || r[2] === 'Meta Semanal') continue;
     const v = r[2];
     if (!v || v === 'Outros' || v.includes('RESUMO') || v.includes('Meta Total')) break;
-    out.push({
-      nome: v, meta: pR(r[3]),
-      vals: [pR(r[4]), pR(r[5]), pR(r[6]), pR(r[7]), pR(r[8]), pR(r[9])],
-      total: pR(r[10]), pct: pP(r[12]), status: r[16] || r[15] || ''
-    });
+    out.push({ nome: v, meta: pR(r[3]), vals: [pR(r[4]), pR(r[5]), pR(r[6]), pR(r[7]), pR(r[8]), pR(r[9])], total: pR(r[10]), pct: pP(r[12]), status: r[16] || r[15] || '' });
   }
   return out;
 }
 
 function getBD() {
   const dm = {};
-  D.bd.forEach(r => {
-    if (r.length < 12) return;
-    const dep = (r[4] || '').trim();
-    const v = pR(r[11]);
-    if (dep && !dep.includes('DEPARTAMENTO')) {
-      const n = dep.replace(/^\d+\s*-\s*/, '');
-      dm[n] = (dm[n] || 0) + v;
-    }
-  });
+  D.bd.forEach(r => { if (r.length < 12) return; const dep = (r[4] || '').trim(); const v = pR(r[11]); if (dep && !dep.includes('DEPARTAMENTO')) { const n = dep.replace(/^\d+\s*-\s*/, ''); dm[n] = (dm[n] || 0) + v; } });
   return Object.entries(dm).sort((a, b) => b[1] - a[1]);
 }
 
@@ -836,7 +777,7 @@ function getSetores() {
 }
 
 /* ========================================================
-   MAIN RENDER ORCHESTRATOR
+   MAIN RENDER
    ======================================================== */
 function render() {
   const k = getKPIs();
@@ -852,7 +793,6 @@ function render() {
   renderHeatmap(daily);
   renderDeptChart(getBD());
   renderSetorChart(getSetores());
-  initScrollReveal();
 }
 
 /* ========================================================
@@ -873,12 +813,7 @@ function renderKPIs(k) {
       <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Projeção Mensal</p><p class="text-2xl font-black font-space text-blue-600 tracking-tight kpi-counter" data-target="${k.projecao}">${fK(k.projecao)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${fP(k.pctProj)} da meta</p></div>
       <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Meta Diária Necessária</p><p class="text-2xl font-black font-space text-yellow-600 tracking-tight kpi-counter" data-target="${k.metaDiaNec}">${fK(k.metaDiaNec)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${k.diasRest} dias restantes</p></div>
       <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Ritmo</p><div class="flex items-center gap-2"><i class="fa-solid ${ritmoIcon} text-2xl ${rc}"></i><p class="text-xl font-black font-space ${rc} tracking-tight">${k.ritmo || '---'}</p></div><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${ritmoDesc}</p></div>`;
-
-    /* Animate KPI counters */
-    mainEl.querySelectorAll('.kpi-counter').forEach(el => {
-      const target = parseFloat(el.getAttribute('data-target'));
-      if (target > 0) animateCounter(el, target, '', '', 1500);
-    });
+    mainEl.querySelectorAll('.kpi-counter').forEach(el => { const target = parseFloat(el.getAttribute('data-target')); if (target > 0) animateCounter(el, target, '', '', 1500); });
   }
 
   const secEl = document.getElementById('kpiSec');
@@ -895,7 +830,7 @@ function renderKPIs(k) {
 }
 
 /* ========================================================
-   TEAM TABLE (unified compact view)
+   TEAM TABLE
    ======================================================== */
 function renderTeamTable(rank) {
   const b = document.getElementById('teamBody');
@@ -909,55 +844,35 @@ function renderTeamTable(rank) {
     const comEst = r.real * faixa.taxa;
     const stNorm = normAccent(r.status);
     const isAcima = stNorm.includes('ACIMA') || stNorm.includes('EXCELENTE') || r.pct >= 100;
-
-    if (isAcima) {
-      mood = {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', badge:'bg-green-500/20 text-green-400', label:'Acima da Meta', extra:''};
-    }
+    if (isAcima) { mood = {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', badge:'bg-green-500/20 text-green-400', label:'Acima da Meta', extra:''}; }
 
     const bc = isAcima ? 'bg-green-500' : r.pct >= 80 ? 'bg-green-500' : r.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
     const tc = isAcima ? 'text-green-600' : r.pct >= 80 ? 'text-green-600' : r.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
     const statusTxt = r.status || mood.label;
-
-    /* TOTAL EQUIPE row */
     const tot = r.isTotal ? ' bg-dark text-palha-50 font-bold' : '';
     const totalTextGreen = r.isTotal ? 'text-green-300' : 'text-green-700';
     const totalTextRed = r.isTotal ? 'text-red-300' : 'text-red-600';
     const totalPctColor = r.isTotal ? (r.pct >= 80 ? 'text-green-300' : r.pct >= 50 ? 'text-yellow-300' : 'text-red-300') : tc;
     const barBg = r.isTotal ? 'bg-palha-50/20' : 'bg-dark/5';
 
-    /* Avatar */
     const avatarHTML = r.isTotal
       ? '<div class="w-8 h-8 rounded-full bg-palha-50/20 flex items-center justify-center"><i class="fa-solid fa-users text-palha-50/60 text-[10px]"></i></div>'
       : '<div class="w-8 h-8 rounded-full ' + mood.bg + ' ring-1 ' + mood.ring + ' flex items-center justify-center"><i class="fa-solid ' + mood.icon + ' text-white text-[10px]"></i></div>';
+    const setorHTML = r.isTotal ? '' : '<p class="text-[8px] text-dark/30 font-medium mt-0.5">' + setor + '</p>';
 
-    /* Setor label */
-    const setorHTML = r.isTotal ? '' : '<p class="text-[8px] ' + (r.isTotal ? 'text-palha-50/40' : 'text-dark/30') + ' font-medium mt-0.5">' + setor + '</p>';
-
-    b.innerHTML += `<tr class="border-b border-dark/5 hover:bg-palha-100/50 transition-colors${tot}" data-v="${r.nome}">
-      <td class="px-2 py-2.5 text-center">${avatarHTML}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap"><span class="font-bold text-[11px]">${r.nome}</span>${setorHTML}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.meta)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-bold ${totalTextGreen} whitespace-nowrap">${fR(r.real)}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">
-        <div class="flex items-center gap-2">
-          <span class="tabular-nums font-space font-extrabold ${totalPctColor}">${fP(r.pct)}</span>
-          <div class="w-16 h-1.5 ${barBg} rounded-full overflow-hidden"><div class="${bc} h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="${Math.min(r.pct, 100)}%"></div></div>
-        </div>
-      </td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold ${totalTextRed} whitespace-nowrap">${fR(r.gap)}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.proj)}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">${statusTxt ? '<span class="inline-block px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(statusTxt) + '">' + statusTxt + '</span>' : ''}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-bold ${r.isTotal ? 'text-green-300' : 'text-green-600'} whitespace-nowrap">${fK(comEst)}</td>
-    </tr>`;
+    b.innerHTML += '<tr class="border-b border-dark/5 hover:bg-palha-100/50 transition-colors' + tot + '" data-v="' + r.nome + '">' +
+      '<td class="px-2 py-2.5 text-center">' + avatarHTML + '</td>' +
+      '<td class="px-3 py-2.5 whitespace-nowrap"><span class="font-bold text-[11px]">' + r.nome + '</span>' + setorHTML + '</td>' +
+      '<td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + fR(r.meta) + '</td>' +
+      '<td class="px-3 py-2.5 tabular-nums font-space font-bold ' + totalTextGreen + ' whitespace-nowrap">' + fR(r.real) + '</td>' +
+      '<td class="px-3 py-2.5 whitespace-nowrap"><div class="flex items-center gap-2"><span class="tabular-nums font-space font-extrabold ' + totalPctColor + '">' + fP(r.pct) + '</span><div class="w-16 h-1.5 ' + barBg + ' rounded-full overflow-hidden"><div class="' + bc + ' h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="' + Math.min(r.pct, 100) + '%"></div></div></div></td>' +
+      '<td class="px-3 py-2.5 tabular-nums font-space font-semibold ' + totalTextRed + ' whitespace-nowrap">' + fR(r.gap) + '</td>' +
+      '<td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + fR(r.proj) + '</td>' +
+      '<td class="px-3 py-2.5 whitespace-nowrap">' + (statusTxt ? '<span class="inline-block px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(statusTxt) + '">' + statusTxt + '</span>' : '') + '</td>' +
+      '<td class="px-3 py-2.5 tabular-nums font-space font-bold ' + (r.isTotal ? 'text-green-300' : 'text-green-600') + ' whitespace-nowrap">' + fK(comEst) + '</td></tr>';
   });
 
-  /* Animate progress bars */
-  setTimeout(() => {
-    document.querySelectorAll('#teamBody .progress-bar-anim').forEach(bar => {
-      const tw = bar.getAttribute('data-target-width');
-      if (tw) bar.style.width = tw;
-    });
-  }, 200);
+  setTimeout(() => { document.querySelectorAll('#teamBody .progress-bar-anim').forEach(bar => { const tw = bar.getAttribute('data-target-width'); if (tw) bar.style.width = tw; }); }, 200);
 }
 
 /* ========================================================
@@ -968,163 +883,57 @@ Chart.defaults.color = '#999';
 const gC = 'rgba(0,0,0,.04)';
 
 function renderWeeklyChart(k) {
-  const ctx = document.getElementById('chartSemanal');
-  if (!ctx) return;
+  const ctx = document.getElementById('chartSemanal'); if (!ctx) return;
   if (charts.sem) charts.sem.destroy();
-  charts.sem = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-      datasets: [
-        {label: 'Meta', data: k.metaS, backgroundColor: 'rgba(10,10,10,.08)', borderColor: 'rgba(10,10,10,.25)', borderWidth: 1, borderRadius: 6, barPercentage: 0.5},
-        {label: 'Realizado', data: k.realS, backgroundColor: k.realS.map((v, i) => v >= k.metaS[i] ? 'rgba(22,163,74,.3)' : 'rgba(220,38,38,.3)'), borderColor: k.realS.map((v, i) => v >= k.metaS[i] ? '#16a34a' : '#dc2626'), borderWidth: 1, borderRadius: 6, barPercentage: 0.5}
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {legend: {labels: {usePointStyle: true, pointStyle: 'rectRounded', padding: 14, font: {size: 10, weight: 600}}}},
-      scales: {
-        x: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}},
-        y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}}
-      }
-    }
-  });
+  charts.sem = new Chart(ctx, { type: 'bar', data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], datasets: [
+    {label: 'Meta', data: k.metaS, backgroundColor: 'rgba(10,10,10,.08)', borderColor: 'rgba(10,10,10,.25)', borderWidth: 1, borderRadius: 6, barPercentage: 0.5},
+    {label: 'Realizado', data: k.realS, backgroundColor: k.realS.map((v, i) => v >= k.metaS[i] ? 'rgba(22,163,74,.3)' : 'rgba(220,38,38,.3)'), borderColor: k.realS.map((v, i) => v >= k.metaS[i] ? '#16a34a' : '#dc2626'), borderWidth: 1, borderRadius: 6, barPercentage: 0.5}
+  ]}, options: { responsive: true, maintainAspectRatio: false, plugins: {legend: {labels: {usePointStyle: true, pointStyle: 'rectRounded', padding: 14, font: {size: 10, weight: 600}}}}, scales: { x: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}}, y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}} } } });
 }
 
 function renderRankChart(rank) {
   const s = rank.filter(r => !r.isTotal).sort((a, b) => b.pct - a.pct);
-  const ctx = document.getElementById('chartRanking');
-  if (!ctx) return;
+  const ctx = document.getElementById('chartRanking'); if (!ctx) return;
   if (charts.rank) charts.rank.destroy();
-  charts.rank = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: s.map(x => x.nome),
-      datasets: [{
-        data: s.map(x => x.pct),
-        backgroundColor: s.map(x => x.pct >= 80 ? 'rgba(22,163,74,.35)' : x.pct >= 50 ? 'rgba(202,138,4,.35)' : 'rgba(220,38,38,.35)'),
-        borderColor: s.map(x => x.pct >= 80 ? '#16a34a' : x.pct >= 50 ? '#ca8a04' : '#dc2626'),
-        borderWidth: 1, borderRadius: 4, barPercentage: 0.55
-      }]
-    },
-    options: {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: {legend: {display: false}},
-      scales: {
-        x: {grid: {color: gC}, ticks: {callback: v => v + '%', font: {size: 9}}, suggestedMax: 120},
-        y: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}}
-      }
-    }
-  });
+  charts.rank = new Chart(ctx, { type: 'bar', data: { labels: s.map(x => x.nome), datasets: [{ data: s.map(x => x.pct), backgroundColor: s.map(x => x.pct >= 80 ? 'rgba(22,163,74,.35)' : x.pct >= 50 ? 'rgba(202,138,4,.35)' : 'rgba(220,38,38,.35)'), borderColor: s.map(x => x.pct >= 80 ? '#16a34a' : x.pct >= 50 ? '#ca8a04' : '#dc2626'), borderWidth: 1, borderRadius: 4, barPercentage: 0.55 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}}, scales: { x: {grid: {color: gC}, ticks: {callback: v => v + '%', font: {size: 9}}, suggestedMax: 120}, y: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}} } } });
 }
 
 function renderEvoChart(daily) {
-  const ctx = document.getElementById('chartEvolucao');
-  if (!ctx) return;
+  const ctx = document.getElementById('chartEvolucao'); if (!ctx) return;
   if (charts.evo) charts.evo.destroy();
   const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-  const labels = [];
-  daily.forEach(w => days.forEach(d => labels.push(w.n + ' ' + d)));
-  const dt = [];
-  daily.forEach(w => {
-    for (let i = 0; i < 6; i++) {
-      let t = 0;
-      w.d.forEach(s => t += (s.vals[i] || 0));
-      dt.push(t);
-    }
-  });
-  const cum = [];
-  let ac = 0;
-  dt.forEach(v => { ac += v; cum.push(ac); });
-  const k = getKPIs();
-  const ml = labels.map((_, i) => k.metaMes * (i + 1) / labels.length);
-
-  charts.evo = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {label: 'Realizado Acum.', data: cum, borderColor: '#0a0a0a', backgroundColor: 'rgba(10,10,10,.03)', fill: true, tension: 0.35, pointRadius: 1, pointHoverRadius: 4, borderWidth: 2},
-        {label: 'Meta Linear', data: ml, borderColor: 'rgba(220,38,38,.3)', borderDash: [5, 4], pointRadius: 0, borderWidth: 1.5, fill: false}
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {legend: {labels: {usePointStyle: true, padding: 12, font: {size: 10, weight: 600}}}},
-      scales: {
-        x: {grid: {display: false}, ticks: {maxRotation: 45, font: {size: 7}}},
-        y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e6).toFixed(1) + 'M', font: {size: 9}}}
-      }
-    }
-  });
+  const labels = []; daily.forEach(w => days.forEach(d => labels.push(w.n + ' ' + d)));
+  const dt = []; daily.forEach(w => { for (let i = 0; i < 6; i++) { let t = 0; w.d.forEach(s => t += (s.vals[i] || 0)); dt.push(t); } });
+  const cum = []; let ac = 0; dt.forEach(v => { ac += v; cum.push(ac); });
+  const k = getKPIs(); const ml = labels.map((_, i) => k.metaMes * (i + 1) / labels.length);
+  charts.evo = new Chart(ctx, { type: 'line', data: { labels, datasets: [ {label: 'Realizado Acum.', data: cum, borderColor: '#0a0a0a', backgroundColor: 'rgba(10,10,10,.03)', fill: true, tension: 0.35, pointRadius: 1, pointHoverRadius: 4, borderWidth: 2}, {label: 'Meta Linear', data: ml, borderColor: 'rgba(220,38,38,.3)', borderDash: [5, 4], pointRadius: 0, borderWidth: 1.5, fill: false} ] }, options: { responsive: true, maintainAspectRatio: false, plugins: {legend: {labels: {usePointStyle: true, padding: 12, font: {size: 10, weight: 600}}}}, scales: { x: {grid: {display: false}, ticks: {maxRotation: 45, font: {size: 7}}}, y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e6).toFixed(1) + 'M', font: {size: 9}}} } } });
 }
 
 function renderDeptChart(deps) {
-  const ctx = document.getElementById('chartDepto');
-  if (!ctx) return;
+  const ctx = document.getElementById('chartDepto'); if (!ctx) return;
   if (charts.dep) charts.dep.destroy();
   const colors = ['#0a0a0a', '#c4a265', '#16a34a', '#2563eb', '#dc2626', '#ca8a04', '#9333ea', '#ea580c', '#059669'];
-  charts.dep = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: deps.map(d => d[0]),
-      datasets: [{data: deps.map(d => d[1]), backgroundColor: colors.map(c => c + 'cc'), borderColor: '#faf7f0', borderWidth: 2, hoverOffset: 5}]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false, cutout: '58%',
-      plugins: {legend: {position: 'right', labels: {usePointStyle: true, pointStyle: 'circle', padding: 8, font: {size: 9, weight: 500}}}}
-    }
-  });
+  charts.dep = new Chart(ctx, { type: 'doughnut', data: { labels: deps.map(d => d[0]), datasets: [{data: deps.map(d => d[1]), backgroundColor: colors.map(c => c + 'cc'), borderColor: '#faf7f0', borderWidth: 2, hoverOffset: 5}] }, options: { responsive: true, maintainAspectRatio: false, cutout: '58%', plugins: {legend: {position: 'right', labels: {usePointStyle: true, pointStyle: 'circle', padding: 8, font: {size: 9, weight: 500}}}} } });
 }
 
 function renderSetorChart(setores) {
-  const ctx = document.getElementById('chartSetor');
-  if (!ctx) return;
+  const ctx = document.getElementById('chartSetor'); if (!ctx) return;
   if (charts.cat) charts.cat.destroy();
   const total = setores.reduce((a, s) => a + s[1], 0);
   const cores = {Chapelaria: '#c4a265', Selaria: '#ca8a04', Vestuário: '#16a34a'};
   const vendMap = {Chapelaria: 'Agnaldo, João', Selaria: 'Luiz Alberto', Vestuário: 'Manoel, Michele, Karol, Kaue, Julio, Alexandre, Fernando, Ledson'};
-
-  charts.cat = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: setores.map(s => s[0]),
-      datasets: [{
-        data: setores.map(s => s[1]),
-        backgroundColor: setores.map(s => (cores[s[0]] || '#2563eb') + '66'),
-        borderColor: setores.map(s => cores[s[0]] || '#2563eb'),
-        borderWidth: 1.5, borderRadius: 8, barPercentage: 0.45
-      }]
-    },
-    options: {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: {display: false},
-        tooltip: {callbacks: {
-          label: c => fR(c.parsed.x) + ' (' + fP(c.parsed.x / total * 100) + ')',
-          afterLabel: c => 'Vendedores: ' + vendMap[setores[c.dataIndex][0]]
-        }}
-      },
-      scales: {
-        x: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}},
-        y: {grid: {display: false}, ticks: {font: {size: 12, weight: 700}}}
-      }
-    }
-  });
+  charts.cat = new Chart(ctx, { type: 'bar', data: { labels: setores.map(s => s[0]), datasets: [{ data: setores.map(s => s[1]), backgroundColor: setores.map(s => (cores[s[0]] || '#2563eb') + '66'), borderColor: setores.map(s => cores[s[0]] || '#2563eb'), borderWidth: 1.5, borderRadius: 8, barPercentage: 0.45 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false}, tooltip: {callbacks: { label: c => fR(c.parsed.x) + ' (' + fP(c.parsed.x / total * 100) + ')', afterLabel: c => 'Vendedores: ' + vendMap[setores[c.dataIndex][0]] }} }, scales: { x: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}}, y: {grid: {display: false}, ticks: {font: {size: 12, weight: 700}}} } } });
 }
 
 /* ========================================================
    HEATMAP
    ======================================================== */
 function renderHeatmap(daily) {
-  const el = document.getElementById('heatmapBox');
-  if (!el) return;
+  const el = document.getElementById('heatmapBox'); if (!el) return;
   const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-  const names = new Set();
-  daily.forEach(w => w.d.forEach(s => names.add(s.nome)));
+  const names = new Set(); daily.forEach(w => w.d.forEach(s => names.add(s.nome)));
   const sellers = [...names];
-  let mx = 0;
-  daily.forEach(w => w.d.forEach(s => s.vals.forEach(v => { if (v > mx) mx = v; })));
+  let mx = 0; daily.forEach(w => w.d.forEach(s => s.vals.forEach(v => { if (v > mx) mx = v; })));
 
   let h = '<table class="w-full border-collapse text-[10px] min-w-[700px]"><thead><tr><th class="p-1.5 text-left text-[7px] font-extrabold text-dark/30 uppercase tracking-wider border-b border-dark/5">Vendedor</th>';
   daily.forEach(w => days.forEach(d => h += '<th class="p-1 text-center text-[7px] font-bold text-dark/25 uppercase border-b border-dark/5">' + w.n + ' ' + d + '</th>'));
@@ -1132,22 +941,9 @@ function renderHeatmap(daily) {
 
   sellers.forEach(name => {
     h += '<tr><td class="text-left font-bold text-dark/50 pl-1.5 py-0.5 text-[10px]">' + name + '</td>';
-    daily.forEach(w => {
-      const s = w.d.find(x => x.nome === name);
-      days.forEach((_, di) => {
-        const v = s ? (s.vals[di] || 0) : 0;
-        const int = mx ? v / mx : 0;
-        let bg, fg;
-        if (v === 0) { bg = 'rgba(0,0,0,.02)'; fg = '#ccc'; }
-        else if (int > 0.6) { bg = 'rgba(22,163,74,' + (0.15 + int * 0.55) + ')'; fg = '#fff'; }
-        else if (int > 0.3) { bg = 'rgba(196,162,101,' + (0.1 + int * 0.5) + ')'; fg = '#fff'; }
-        else { bg = 'rgba(220,38,38,' + (0.08 + int * 0.45) + ')'; fg = '#fff'; }
-        h += '<td class="p-0.5"><div class="hm-cell" style="background:' + bg + ';color:' + fg + '" title="' + name + ': ' + fR(v) + '">' + (v > 0 ? (v / 1e3).toFixed(1) + 'k' : '.') + '</div></td>';
-      });
-    });
+    daily.forEach(w => { const s = w.d.find(x => x.nome === name); days.forEach((_, di) => { const v = s ? (s.vals[di] || 0) : 0; const int = mx ? v / mx : 0; let bg, fg; if (v === 0) { bg = 'rgba(0,0,0,.02)'; fg = '#ccc'; } else if (int > 0.6) { bg = 'rgba(22,163,74,' + (0.15 + int * 0.55) + ')'; fg = '#fff'; } else if (int > 0.3) { bg = 'rgba(196,162,101,' + (0.1 + int * 0.5) + ')'; fg = '#fff'; } else { bg = 'rgba(220,38,38,' + (0.08 + int * 0.45) + ')'; fg = '#fff'; } h += '<td class="p-0.5"><div class="hm-cell" style="background:' + bg + ';color:' + fg + '" title="' + name + ': ' + fR(v) + '">' + (v > 0 ? (v / 1e3).toFixed(1) + 'k' : '.') + '</div></td>'; }); });
     h += '</tr>';
   });
-
   el.innerHTML = h + '</tbody></table>';
 }
 
@@ -1162,31 +958,16 @@ function badgeFor(st) {
   return 'bg-red-600/10 text-red-700';
 }
 
-
 /* ========================================================
-   COMMISSION TABLE - TOTAL row with dark bg
+   COMMISSION TABLE
    ======================================================== */
 function renderCommTable(comm) {
-  const b = document.getElementById('commBody');
-  if (!b) return;
+  const b = document.getElementById('commBody'); if (!b) return;
   b.innerHTML = '';
-
   comm.forEach(r => {
-    /* TOTAL EQUIPE gets dark background with light text */
     const tot = r.isTotal ? ' bg-dark text-palha-50 font-bold' : '';
     const totalTextGreen = r.isTotal ? 'text-green-300' : 'text-green-700';
-
-    b.innerHTML += `<tr class="${tot}">
-      <td class="px-3 py-2.5 font-bold whitespace-nowrap">${r.nome}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s1}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s2}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s3}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s4}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-extrabold ${totalTextGreen} whitespace-nowrap">${r.total}</td>
-      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.pct}</td>
-      <td class="px-3 py-2.5 text-[10px] ${r.isTotal ? 'text-palha-50/60' : 'text-dark/40'} whitespace-nowrap">${r.faixa}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">${r.status ? '<span class="inline-block px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(r.status) + '">' + r.status + '</span>' : ''}</td>
-    </tr>`;
+    b.innerHTML += '<tr class="' + tot + '"><td class="px-3 py-2.5 font-bold whitespace-nowrap">' + r.nome + '</td><td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + r.s1 + '</td><td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + r.s2 + '</td><td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + r.s3 + '</td><td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + r.s4 + '</td><td class="px-3 py-2.5 tabular-nums font-space font-extrabold ' + totalTextGreen + ' whitespace-nowrap">' + r.total + '</td><td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">' + r.pct + '</td><td class="px-3 py-2.5 text-[10px] ' + (r.isTotal ? 'text-palha-50/60' : 'text-dark/40') + ' whitespace-nowrap">' + r.faixa + '</td><td class="px-3 py-2.5 whitespace-nowrap">' + (r.status ? '<span class="inline-block px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(r.status) + '">' + r.status + '</span>' : '') + '</td></tr>';
   });
 }
 
@@ -1194,13 +975,10 @@ function renderCommTable(comm) {
    FILTERS
    ======================================================== */
 function populateFilter(rank) {
-  const sel = document.getElementById('fVendedor');
-  if (!sel) return;
+  const sel = document.getElementById('fVendedor'); if (!sel) return;
   const cur = sel.value;
   sel.innerHTML = '<option value="todos">Todos</option>';
-  rank.filter(r => !r.isTotal).forEach(r => {
-    sel.innerHTML += '<option value="' + r.nome + '">' + r.nome + '</option>';
-  });
+  rank.filter(r => !r.isTotal).forEach(r => { sel.innerHTML += '<option value="' + r.nome + '">' + r.nome + '</option>'; });
   sel.value = cur || 'todos';
 }
 
@@ -1213,86 +991,38 @@ function applyFilters() {
 }
 
 /* ========================================================
-   SHIPPING CALCULATOR (Melhor Envio Sandbox)
+   SHIPPING CALCULATOR
    ======================================================== */
 async function calcularFrete() {
   const cepInput = document.getElementById('cepDestino');
   const cep = cepInput ? cepInput.value.replace(/\D/g, '') : '';
-  const el = document.getElementById('freteResultados');
-  if (!el) return;
+  const el = document.getElementById('freteResultados'); if (!el) return;
 
-  if (cep.length !== 8) {
-    el.innerHTML = '<p class="text-red-600 text-xs font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>CEP invalido. Informe 8 digitos.</p>';
-    return;
-  }
-
-  if (ME_TOKEN === 'SEU_TOKEN_SANDBOX') {
-    el.innerHTML = '<p class="text-yellow-700 text-xs leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Configure o token do Melhor Envio no codigo (variavel ME_TOKEN). Crie uma conta em <a href="https://sandbox.melhorenvio.com.br" target="_blank" class="underline font-bold">sandbox.melhorenvio.com.br</a></p>';
-    return;
-  }
+  if (cep.length !== 8) { el.innerHTML = '<p class="text-red-600 text-xs font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>CEP inválido. Informe 8 dígitos.</p>'; return; }
+  if (ME_TOKEN === 'SEU_TOKEN_SANDBOX') { el.innerHTML = '<p class="text-yellow-700 text-xs leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Configure o token do Melhor Envio no código (variável ME_TOKEN). Crie uma conta em <a href="https://sandbox.melhorenvio.com.br" target="_blank" class="underline font-bold">sandbox.melhorenvio.com.br</a></p>'; return; }
 
   el.innerHTML = '<div class="flex items-center gap-2 text-dark/40 text-xs"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Consultando transportadoras...</div>';
 
-  const body = {
-    from: {postal_code: CEP_ORIGEM},
-    to: {postal_code: cep},
-    products: [{
-      id: "1",
-      width: parseFloat(document.getElementById('freteLargura').value) || 30,
-      height: parseFloat(document.getElementById('freteAltura').value) || 20,
-      length: parseFloat(document.getElementById('freteComp').value) || 40,
-      weight: parseFloat(document.getElementById('fretePeso').value) || 1,
-      insurance_value: parseFloat(document.getElementById('freteValor').value) || 100,
-      quantity: 1
-    }]
-  };
+  const body = { from: {postal_code: CEP_ORIGEM}, to: {postal_code: cep}, products: [{ id: "1", width: parseFloat(document.getElementById('freteLargura').value) || 30, height: parseFloat(document.getElementById('freteAltura').value) || 20, length: parseFloat(document.getElementById('freteComp').value) || 40, weight: parseFloat(document.getElementById('fretePeso').value) || 1, insurance_value: parseFloat(document.getElementById('freteValor').value) || 100, quantity: 1 }] };
 
   try {
     const url = 'https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate';
-    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + ME_TOKEN,
-        'User-Agent': 'TexasCenter (contato@texascenter.com.br)'
-      },
-      body: JSON.stringify(body)
-    });
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + ME_TOKEN, 'User-Agent': 'TexasCenter (contato@texascenter.com.br)' }, body: JSON.stringify(body) });
     const data = await r.json();
     renderFreteResultados(data);
-  } catch (e) {
-    console.error('Frete error:', e);
-    el.innerHTML = '<p class="text-red-600 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Erro na consulta. Tente novamente.</p>';
-  }
+  } catch (e) { console.error('Frete error:', e); el.innerHTML = '<p class="text-red-600 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Erro na consulta. Tente novamente.</p>'; }
 }
 
 function renderFreteResultados(data) {
-  const el = document.getElementById('freteResultados');
-  if (!el) return;
-
-  /* Filter valid results and sort by price */
-  const valid = (Array.isArray(data) ? data : [])
-    .filter(s => !s.error && s.price)
-    .sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-
-  if (valid.length === 0) {
-    el.innerHTML = '<p class="text-dark/40 text-xs"><i class="fa-solid fa-box-open mr-1"></i>Nenhuma transportadora disponivel para este CEP.</p>';
-    return;
-  }
+  const el = document.getElementById('freteResultados'); if (!el) return;
+  const valid = (Array.isArray(data) ? data : []).filter(s => !s.error && s.price).sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+  if (valid.length === 0) { el.innerHTML = '<p class="text-dark/40 text-xs"><i class="fa-solid fa-box-open mr-1"></i>Nenhuma transportadora disponível para este CEP.</p>'; return; }
 
   el.innerHTML = valid.map((s, i) => {
     const isCheapest = i === 0;
     const borderColor = isCheapest ? 'border-l-green-500' : 'border-l-palha-400';
     const badge = isCheapest ? '<span class="text-[7px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-bold uppercase">Mais barato</span>' : '';
-    return `<div class="flex items-center gap-3 p-3 bg-white border border-dark/5 ${borderColor} border-l-[3px] rounded-lg mb-2 hover:shadow-md transition-all" style="animation:fadeIn .3s ease ${i * 0.08}s forwards;opacity:0">
-      <img src="${s.company?.picture || ''}" class="w-8 h-8 object-contain rounded" onerror="this.style.display='none'" alt="">
-      <div class="flex-1 min-w-0">
-        <p class="text-[11px] font-bold text-dark truncate">${s.name} ${badge}</p>
-        <p class="text-[9px] text-dark/40">${s.company?.name || ''} - ${s.delivery_range?.min || '?'}-${s.delivery_range?.max || '?'} dias uteis</p>
-      </div>
-      <p class="text-sm font-black font-space ${isCheapest ? 'text-green-600' : 'text-dark'} whitespace-nowrap">R$ ${parseFloat(s.price).toFixed(2)}</p>
-    </div>`;
+    return '<div class="flex items-center gap-3 p-3 bg-white border border-dark/5 ' + borderColor + ' border-l-[3px] rounded-lg mb-2 hover:shadow-md transition-all" style="animation:fadeIn .3s ease ' + (i * 0.08) + 's forwards;opacity:0"><img src="' + (s.company?.picture || '') + '" class="w-8 h-8 object-contain rounded" onerror="this.style.display=\'none\'" alt=""><div class="flex-1 min-w-0"><p class="text-[11px] font-bold text-dark truncate">' + s.name + ' ' + badge + '</p><p class="text-[9px] text-dark/40">' + (s.company?.name || '') + ' - ' + (s.delivery_range?.min || '?') + '-' + (s.delivery_range?.max || '?') + ' dias úteis</p></div><p class="text-sm font-black font-space ' + (isCheapest ? 'text-green-600' : 'text-dark') + ' whitespace-nowrap">R$ ' + parseFloat(s.price).toFixed(2) + '</p></div>';
   }).join('');
 }
 
