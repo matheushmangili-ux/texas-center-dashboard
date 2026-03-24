@@ -708,7 +708,7 @@ function getKPIs() {
     if (id === '13') { o.realMes = pR(row[1]); o.metaMes = pR(row[3]); o.pctMes = pP(row[5]); }
     if (id === '16') { o.metaDiaNec = pR(row[1]); o.projecao = pR(row[3]); o.pctProj = pP(row[5]); }
     if (id === '18') { o.diasRest = parseInt(row[8]) || 0; o.diasTrab = parseInt(row[9]) || 0; o.diasTot = parseInt(row[10]) || 0; o.refLY = pR(row[11]); o.pctLY = pP(row[12]); }
-    if (id === '19') { o.pu = row[8] || ''; o.pa = row[10] || ''; }
+    if (id === '19') { o.pu = (row[9] || '').replace(/%%/g, '%'); o.pa = row[11] || ''; }
     if (id === '20') { o.ritmo = (row[9] || '').trim(); }
   }
   o.metaS = o.metaS || [0,0,0,0]; o.realS = o.realS || [0,0,0,0]; o.pctS = o.pctS || [0,0,0,0];
