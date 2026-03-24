@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Texas Center | Sales Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+tailwind.config={
+  theme:{
+    extend:{
+      colors:{
+        palha:{50:'#faf7f0',100:'#f5f0e6',200:'#ede5d5',300:'#e0d3bd',400:'#c4a265',500:'#a38b5c',600:'#8b7348',DEFAULT:'#c4a265'},
+        dark:'#0a0a0a',
+        dark2:'#1a1a1a',
+      },
+      fontFamily:{
+        orbitron:['Orbitron','sans-serif'],
+        space:['Space Grotesk','sans-serif'],
+        inter:['Inter','system-ui','sans-serif'],
+        dm:['"DM Sans"','sans-serif'],
+      },
+      animation:{
+        'warm-shift':'warmShift 25s ease infinite',
+        'fade-in':'fadeIn 0.5s ease forwards',
+      },
+      keyframes:{
+        warmShift:{'0%,100%':{backgroundPosition:'0% 50%'},'50%':{backgroundPosition:'100% 50%'}},
+        fadeIn:{from:{opacity:0,transform:'translateY(10px)'},to:{opacity:1,transform:'translateY(0)'}},
+      }
+    }
+  }
+}
+</script>
+<style>
+  /* Background & global styles */
+  body{background:linear-gradient(135deg,#f5f0e6 0%,#ede5d5 25%,#f5f0e6 50%,#e8dcc8 75%,#f5f0e6 100%);background-size:400% 400%;animation:warmShift 25s ease infinite}
+  body::after{content:'';position:fixed;inset:0;opacity:0.02;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px}
+
+  /* Keyframes */
+  @keyframes warmShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes loadBar{0%{width:0}50%{width:70%}100%{width:100%}}
+  @keyframes pulseSync{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Western silhouette background */
+  .western-bg::before{content:'';position:fixed;bottom:0;left:0;right:0;height:180px;opacity:.035;pointer-events:none;z-index:0;background-repeat:repeat-x;background-position:bottom center;background-size:auto 180px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 180'%3E%3Cpath fill='%230a0a0a' d='M0 180V120l30-10 20 5 40-25 15 10 25-15 35 20 20-8 30 15 25-20 40 10 20-5 15 12 45-30 20 15 30-10 25 20 35-25 20 10 40-15 25 18 15-8 30 12 20-20 45 25 15-10 25 15 35-20 20 8 30-12 40 20 20-15 15 10 25-18 40 22 20-10 30 15 25-8 35 12 20-5 30 8 25-15 40 18 15-10 20 12 45-20 20 10 30-8 25 15 5 0z'/%3E%3Cpath fill='%230a0a0a' d='M150 180v-30l3-20 2 5-1 10 3-8-2 12 5-25 2 15-1-8 3 18v31zM155 180v-25l-2-15 1 8-1-5 2 12v25z'/%3E%3Cpath fill='%230a0a0a' d='M380 180v-50l4-30 3 10-2 15 5-20-1 18 3-12 2 22-3-8 1 15 4-18v58zM375 180v-35l-3-20 2 12-1-8 2 15v36zM390 180v-28l2-15-1 8 1-5v40z'/%3E%3Cpath fill='%230a0a0a' d='M700 180v-45l3-25 2 8-1 12 4-18-2 15 3-10 1 20-2-5 1 12 3-15v51zM695 180v-30l-2-18 1 10-1-6 2 14v30z'/%3E%3Cpath fill='%230a0a0a' d='M950 180v-40l5-28 3 12-2 10 4-15-1 18 2-8 1 15-3-5 2 10 3-12v43zM945 180v-25l-3-15 2 8-1-5 2 12v25zM960 180v-20l2-12-1 6 1-4v30z'/%3E%3Cpath fill='%230a0a0a' d='M1100 180v-35l3-22 2 8-1 10 3-15-1 12 2-8 1 18-2-6 1 13v25z'/%3E%3C/svg%3E")}
+
+  /* Heatmap cells */
+  .hm-cell{border-radius:4px;padding:4px 2px;font-weight:700;font-size:8px;text-align:center;transition:transform .15s}
+  .hm-cell:hover{transform:scale(1.15)}
+
+  /* Chart box */
+  .chart-box{position:relative;width:100%;height:280px}
+  @media(max-width:768px){.chart-box{height:220px}}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
+
+  /* Scroll reveal animation */
+  .scroll-reveal{opacity:0;transform:translateY(20px);transition:all 0.6s cubic-bezier(0.16,1,0.3,1)}
+  .scroll-reveal.revealed{opacity:1;transform:translateY(0)}
+
+  /* Card hover effect */
+  .card-hover{transition:all 0.3s cubic-bezier(0.16,1,0.3,1)}
+  .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(124,92,62,0.12)}
+
+  /* KPI accent bar */
+  .kpi-card{position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(124,92,62,0.08)}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
+
+  /* Pulse sync dot */
+  .sync-dot{animation:pulseSync 2s ease-in-out infinite}
+
+  /* Chart slide-in */
+  .chart-slide{opacity:0;transform:translateY(30px);transition:all 0.7s cubic-bezier(0.16,1,0.3,1)}
+  .chart-slide.revealed{opacity:1;transform:translateY(0)}
+
+  /* Progress bar animation */
+  .progress-bar-anim{transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
+
+  /* Table row hover */
+  #tblRanking tbody tr:hover, #tblComm tbody tr:hover{background:rgba(196,162,101,0.08);transition:background 0.2s ease}
+
+  /* Section title (DM Sans) */
+  .section-title{font-family:"DM Sans",sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;letter-spacing:1px;opacity:0.7}
+
+  /* Loading bar */
+  .loading-bar{height:3px;background:linear-gradient(90deg,#c4a265,#8b7348,#c4a265);background-size:200% 100%;border-radius:2px;animation:loadBar 2s ease-in-out infinite}
+
+  /* Fluxo card */
+  .fluxo-card{background:#faf7f0;border:1px solid rgba(10,10,10,0.05);border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(124,92,62,0.08)}
+  .fluxo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c4a265,#8b7348)}
+</style>
+</head>
+<body class="font-inter text-dark min-h-screen antialiased western-bg">
+
+<!-- Loading Screen -->
+<div id="loading" class="fixed inset-0 bg-palha-100 flex flex-col items-center justify-center z-[9999] transition-opacity duration-500">
+  <h2 class="font-orbitron text-2xl font-black tracking-[4px] uppercase text-dark mb-6">TEXAS CENTER</h2>
+  <div class="w-48 h-[3px] bg-dark/10 rounded-full overflow-hidden mb-4">
+    <div class="loading-bar w-full h-full"></div>
+  </div>
+  <p class="text-xs font-semibold tracking-[2px] uppercase text-dark/30">Sincronizando dados...</p>
+</div>
+
+<div class="relative z-10 max-w-[1480px] mx-auto px-4 md:px-8">
+
+  <!-- Header -->
+  <header class="flex flex-col sm:flex-row sm:items-end justify-between py-5 border-b-2 border-dark mb-6 gap-3">
+    <div>
+      <h1 class="font-orbitron text-xl sm:text-2xl font-black tracking-[2px] uppercase text-dark">TEXAS CENTER</h1>
+      <p class="text-[10px] text-dark/40 mt-1 font-space font-semibold tracking-[1.5px] uppercase">Dashboard de Metas — <span id="headerMonth"></span></p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-[10px] text-dark/40 font-medium flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-600 sync-dot"></span>
+        <span id="syncLabel">Conectando...</span>
+      </div>
+      <button onclick="loadAllData()" class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold font-space tracking-wide bg-dark text-palha-50 border-2 border-dark hover:bg-transparent hover:text-dark transition-all min-h-[44px]">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+        Sincronizar
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Banner -->
+  <div id="errorBanner" class="hidden bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 text-red-600 text-xs font-medium"></div>
+
+  <!-- KPIs Primarios -->
+  <div id="kpiMain" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5 scroll-reveal"></div>
+
+  <!-- KPIs Secundarios -->
+  <div id="kpiSec" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-7 scroll-reveal"></div>
+
+  <!-- Fluxo da Loja -->
+  <div id="fluxoSection" class="mb-8 scroll-reveal">
+    <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4">
+      <span class="flex-1 h-px bg-dark/10"></span>
+      Fluxo da Loja
+      <span class="flex-1 h-px bg-dark/10"></span>
+    </p>
+    <div id="fluxoCards" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="fluxo-card relative p-5">
+        <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo Mensal</p>
+        <div id="fluxoMensal" class="text-dark/30 text-xs">Carregando dados de fluxo...</div>
+        <div class="mt-3"><canvas id="chartFluxoCanal" style="max-height:150px"></canvas></div>
+      </div>
+      <div class="fluxo-card relative p-5">
+        <p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-3">Fluxo Dia Anterior</p>
+        <div id="fluxoDia" class="text-dark/30 text-xs">Carregando dados de fluxo...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seller Cards -->
+  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
+    <span class="flex-1 h-px bg-dark/10"></span>
+    Painel Individual dos Vendedores
+    <span class="flex-1 h-px bg-dark/10"></span>
+  </p>
+  <div id="sellerCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-8 scroll-reveal"></div>
+
+  <!-- Filtros -->
+  <div class="flex flex-wrap gap-3 items-center mb-5 scroll-reveal">
+    <label class="text-[9px] text-dark/40 font-extrabold uppercase tracking-wider">Vendedor</label>
+    <select id="fVendedor" onchange="applyFilters()" class="bg-palha-50 text-dark border border-dark/10 rounded-lg px-3 py-2 text-[11px] font-medium outline-none focus:border-palha-400 min-h-[44px]"><option value="todos">Todos</option></select>
+    <label class="text-[9px] text-dark/40 font-extrabold uppercase tracking-wider ml-1">Semana</label>
+    <select id="fSemana" onchange="applyFilters()" class="bg-palha-50 text-dark border border-dark/10 rounded-lg px-3 py-2 text-[11px] font-medium outline-none focus:border-palha-400 min-h-[44px]">
+      <option value="todas">Todas</option><option value="1">Semana 1</option><option value="2">Semana 2</option><option value="3">Semana 3</option><option value="4">Semana 4</option>
+    </select>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3 scroll-reveal">
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Progresso Semanal</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Meta vs Real</span></div>
+      <div class="p-4"><div class="chart-box"><canvas id="chartSemanal"></canvas></div></div>
+    </div>
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Ranking de Atingimento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">% da Meta</span></div>
+      <div class="p-4"><div class="chart-box"><canvas id="chartRanking"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3 scroll-reveal">
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Evolução Acumulada</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Diário</span></div>
+      <div class="p-4"><div class="chart-box"><canvas id="chartEvolucao"></canvas></div></div>
+    </div>
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Mix por Departamento</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Receita</span></div>
+      <div class="p-4"><div class="chart-box"><canvas id="chartDepto"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- Charts Row 3 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3 scroll-reveal">
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Receita por Setor</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Chapelaria / Selaria / Vestuário</span></div>
+      <div class="p-4"><div class="chart-box"><canvas id="chartSetor"></canvas></div></div>
+    </div>
+    <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark px-4 py-3 flex justify-between items-center"><span class="text-xs font-bold text-palha-50 font-space">Heatmap de Vendas</span><span class="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-white/50 uppercase tracking-wide">Vendedor x Dia</span></div>
+      <div class="p-4 overflow-x-auto" id="heatmapBox"></div>
+    </div>
+  </div>
+
+  <!-- Tabela Ranking -->
+  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mt-8 mb-4 scroll-reveal">
+    <span class="flex-1 h-px bg-dark/10"></span>
+    Performance Individual Detalhada
+    <span class="flex-1 h-px bg-dark/10"></span>
+  </p>
+  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs border-collapse" id="tblRanking">
+        <thead><tr class="bg-dark text-palha-50">
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">#</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Realizado</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">%</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Gap</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Meta/Dia</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Projeção</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">% Proj.</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Progresso</th>
+        </tr></thead>
+        <tbody id="rankBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tabela Comissão -->
+  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
+    <span class="flex-1 h-px bg-dark/10"></span>
+    Comissionamento Consolidado
+    <span class="flex-1 h-px bg-dark/10"></span>
+  </p>
+  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs border-collapse" id="tblComm">
+        <thead><tr class="bg-dark text-palha-50">
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Vendedor</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 1</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 2</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 3</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Sem 4</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Total</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">% Atingido</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Faixa</th>
+          <th class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
+        </tr></thead>
+        <tbody id="commBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Calculadora de Frete (Melhor Envio Sandbox) -->
+  <p class="flex items-center gap-3 text-[10px] text-dark/35 uppercase tracking-[2px] font-extrabold font-space mb-4 scroll-reveal">
+    <span class="flex-1 h-px bg-dark/10"></span>
+    Calculadora de Frete
+    <span class="flex-1 h-px bg-dark/10"></span>
+  </p>
+  <div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden mb-6 scroll-reveal" style="box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+      <!-- Form -->
+      <div class="p-5 border-b md:border-b-0 md:border-r border-dark/5">
+        <p class="text-[9px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-4 font-dm">Dados do Envio</p>
+        <div class="space-y-3">
+          <div>
+            <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">CEP Destino</label>
+            <input type="text" id="cepDestino" placeholder="00000-000" maxlength="9" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Peso (kg)</label>
+              <input type="number" id="fretePeso" value="1.0" step="0.1" min="0.1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+            </div>
+            <div>
+              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Altura (cm)</label>
+              <input type="number" id="freteAltura" value="20" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+            </div>
+            <div>
+              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Largura (cm)</label>
+              <input type="number" id="freteLargura" value="30" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Comprimento (cm)</label>
+              <input type="number" id="freteComp" value="40" min="1" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+            </div>
+            <div>
+              <label class="text-[9px] text-dark/40 font-bold uppercase tracking-wider block mb-1">Valor Declarado (R$)</label>
+              <input type="number" id="freteValor" value="100" min="0" step="0.01" class="w-full bg-white border border-dark/10 rounded-lg px-3 py-2.5 text-sm font-space font-semibold outline-none focus:border-palha-400 transition-colors">
+            </div>
+          </div>
+          <button onclick="calcularFrete()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-[11px] font-bold font-space tracking-wide bg-dark text-palha-50 border-2 border-dark hover:bg-transparent hover:text-dark transition-all min-h-[44px]">
+            <i class="fa-solid fa-truck-fast"></i>
+            Calcular Frete
+          </button>
+        </div>
+      </div>
+      <!-- Results -->
+      <div class="p-5">
+        <p class="text-[9px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-4 font-dm">Opções de Envio</p>
+        <div id="freteResultados" class="text-dark/40 text-xs">
+          <div class="flex flex-col items-center justify-center py-8 text-center">
+            <i class="fa-solid fa-truck text-3xl text-dark/10 mb-3"></i>
+            <p class="text-[11px] text-dark/30">Informe o CEP de destino para consultar opções de envio</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-dark/10 py-5 mt-10 text-center">
+    <p class="font-orbitron text-[10px] font-black tracking-[3px] text-dark/20 uppercase">Texas Center</p>
+    <p class="text-[8px] text-dark/15 mt-1 font-medium tracking-wider">Painel de Gestão Comercial — Dados sincronizados em tempo real</p>
+  </footer>
+</div>
+
+<script>
+/* ========================================================
+   CONFIG & STATE
+   ======================================================== */
+const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQlOZNO-XQ_cBlHMx939he1HwPMQvgeJTPKqyKMRSqXycB6Okk3udNpStbvNZYJGAX_2R8Nww_entg1/pubhtml/sheet?headers=false&gid=';
+const GID = {resumo:'730516041', s1:'682400813', s2:'1603208091', s3:'1810708365', s4:'406858905', bd:'1063238094'};
+let D = {}, charts = {}, fluxoData = {};
+
+/* Melhor Envio Sandbox config */
+const ME_TOKEN = 'SEU_TOKEN_SANDBOX';
+const CEP_ORIGEM = '64000000';
+
+/* ========================================================
+   HEADER MONTH
+   ======================================================== */
+(function() {
+  const now = new Date();
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const el = document.getElementById('headerMonth');
+  if (el) el.textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+})();
+
+/* ========================================================
+   HELPERS
+   ======================================================== */
+function parseHTML(h) {
+  const d = new DOMParser().parseFromString(h, 'text/html');
+  const o = [];
+  d.querySelectorAll('tr').forEach(tr => {
+    const c = [];
+    tr.querySelectorAll('td,th').forEach(td => c.push(td.textContent.trim()));
+    if (c.some(x => x !== '')) o.push(c);
+  });
+  return o;
+}
+
+function pR(s) {
+  if (!s) return 0;
+  return parseFloat(s.replace('R$', '').replace(/\./g, '').replace(',', '.').replace(/[^\d.\-]/g, '')) || 0;
+}
+
+function pP(s) {
+  return s ? parseFloat(s.replace('%', '').replace(',', '.')) || 0 : 0;
+}
+
+function fR(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function fK(v) {
+  return v >= 1e6 ? 'R$ ' + (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? 'R$ ' + (v / 1e3).toFixed(1) + 'k' : fR(v);
+}
+
+function fP(v) {
+  return v.toFixed(1) + '%';
+}
+
+function formatNumber(v) {
+  return v.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+
+function formatDateISO(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function formatDateBR(d) {
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+}
+
+/* Normalize accented text for comparison */
+function normAccent(s) {
+  return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+}
+
+/* ========================================================
+   SETOR & FAIXA MAPPING
+   ======================================================== */
+const SETOR_MAP = {'Agnaldo':'Chapelaria', 'Joao':'Chapelaria', 'João':'Chapelaria', 'Luiz Alberto':'Selaria'};
+function getSetor(n) { return SETOR_MAP[n] || 'Vestuário'; }
+
+function calcFaixa(pct) {
+  if (pct >= 120) return {taxa: 0.03, label: '>=120% -> 3,00%'};
+  if (pct >= 100) return {taxa: 0.025, label: '100-119% -> 2,50%'};
+  if (pct >= 86) return {taxa: 0.02, label: '86-99% -> 2,00%'};
+  if (pct >= 71) return {taxa: 0.015, label: '71-85% -> 1,50%'};
+  if (pct >= 51) return {taxa: 0.01, label: '51-70% -> 1,00%'};
+  return {taxa: 0.005, label: 'Ate 50% -> 0,50%'};
+}
+
+/* Cowboy mood icon for seller cards - always returns a valid object */
+function cowboyMood(pct) {
+  if (pct >= 100) return {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', label:'Acima da Meta', badge:'bg-green-500/20 text-green-400', extra:'<i class="fa-solid fa-star text-[8px] text-yellow-400 absolute -top-0.5 -right-0.5"></i>'};
+  if (pct >= 80) return {icon:'fa-hat-cowboy-side', bg:'bg-green-600', ring:'ring-green-400', label:'No Caminho', badge:'bg-green-500/20 text-green-400', extra:''};
+  if (pct >= 50) return {icon:'fa-hat-cowboy', bg:'bg-yellow-600', ring:'ring-yellow-400', label:'Atenção', badge:'bg-yellow-500/20 text-yellow-400', extra:''};
+  return {icon:'fa-hat-cowboy-side', bg:'bg-red-600', ring:'ring-red-400', label:'Crítico', badge:'bg-red-500/20 text-red-400', extra:'<i class="fa-solid fa-triangle-exclamation text-[7px] text-red-400 absolute -top-0.5 -right-0.5"></i>'};
+}
+
+/* ========================================================
+   COUNTER ANIMATION
+   ======================================================== */
+function animateCounter(el, target, prefix, suffix, duration) {
+  prefix = prefix || '';
+  suffix = suffix || '';
+  duration = duration || 1500;
+  let start = 0;
+  const startTime = performance.now();
+  function update(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = start + (target - start) * eased;
+    if (target >= 1e6) {
+      el.textContent = prefix + 'R$ ' + (current / 1e6).toFixed(2) + 'M' + suffix;
+    } else if (target >= 1e3) {
+      el.textContent = prefix + 'R$ ' + (current / 1e3).toFixed(1) + 'k' + suffix;
+    } else {
+      el.textContent = prefix + formatNumber(Math.round(current)) + suffix;
+    }
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+/* ========================================================
+   SCROLL REVEAL (IntersectionObserver)
+   ======================================================== */
+function initScrollReveal() {
+  if (typeof IntersectionObserver === 'undefined') {
+    document.querySelectorAll('.scroll-reveal, .chart-slide').forEach(el => el.classList.add('revealed'));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('revealed');
+        observer.unobserve(e.target);
+      }
+    });
+  }, {threshold: 0.1});
+  document.querySelectorAll('.scroll-reveal, .chart-slide').forEach(el => observer.observe(el));
+}
+
+/* ========================================================
+   FETCH HELPERS
+   ======================================================== */
+async function fetchS(gid) {
+  const url = BASE + gid;
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 8000);
+    const r = await fetch(url, {signal: c.signal});
+    clearTimeout(t);
+    if (!r.ok) throw new Error(r.status);
+    return parseHTML(await r.text());
+  } catch (e1) {
+    try {
+      const c2 = new AbortController();
+      const t2 = setTimeout(() => c2.abort(), 10000);
+      const r2 = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {signal: c2.signal});
+      clearTimeout(t2);
+      if (!r2.ok) throw new Error(r2.status);
+      return parseHTML(await r2.text());
+    } catch (e2) {
+      throw e2;
+    }
+  }
+}
+
+async function fetchFluxo(startDate, endDate) {
+  const url = 'https://websamos.com.br/dashtexas.php?data_inicio=' + startDate + '&data_fim=' + endDate + '&vendedor=&canal=&ajax=1';
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 8000);
+    const r = await fetch(url, {signal: c.signal});
+    clearTimeout(t);
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch (e1) {
+    try {
+      const c2 = new AbortController();
+      const t2 = setTimeout(() => c2.abort(), 10000);
+      const r2 = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {signal: c2.signal});
+      clearTimeout(t2);
+      if (!r2.ok) throw new Error(r2.status);
+      return await r2.json();
+    } catch (e2) {
+      throw e2;
+    }
+  }
+}
+
+/* ========================================================
+   FLUXO DATA LOADING - Compare yesterday vs same day LY
+   ======================================================== */
+async function loadFluxoData() {
+  const now = new Date();
+  const monthStart = formatDateISO(new Date(now.getFullYear(), now.getMonth(), 1));
+  const today = formatDateISO(now);
+
+  /* Yesterday */
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatDateISO(yesterday);
+
+  /* Same date last year (LY) */
+  const lyDate = new Date(yesterday);
+  lyDate.setFullYear(lyDate.getFullYear() - 1);
+  const lyDateStr = formatDateISO(lyDate);
+
+  try {
+    const [monthRes, yesterdayRes, lyRes] = await Promise.allSettled([
+      fetchFluxo(monthStart, today),
+      fetchFluxo(yesterdayStr, yesterdayStr),
+      fetchFluxo(lyDateStr, lyDateStr)
+    ]);
+
+    const monthData = monthRes.status === 'fulfilled' ? monthRes.value : null;
+    const yesterdayData = yesterdayRes.status === 'fulfilled' ? yesterdayRes.value : null;
+    const lyData = lyRes.status === 'fulfilled' ? lyRes.value : null;
+
+    fluxoData = {month: monthData, yesterday: yesterdayData, ly: lyData, lyDate: lyDate};
+    renderFluxo();
+  } catch (e) {
+    console.error('Fluxo load error:', e);
+    const mEl = document.getElementById('fluxoMensal');
+    const dEl = document.getElementById('fluxoDia');
+    if (mEl) mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nao foi possivel carregar dados de fluxo</p>';
+    if (dEl) dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nao foi possivel carregar dados de fluxo</p>';
+  }
+}
+
+/* ========================================================
+   RENDER FLUXO SECTION
+   ======================================================== */
+function renderFluxo() {
+  /* Monthly card */
+  const mEl = document.getElementById('fluxoMensal');
+  if (!mEl) return;
+
+  if (fluxoData.month && fluxoData.month.resumo) {
+    const r = fluxoData.month.resumo;
+    mEl.innerHTML = `
+      <div class="flex items-baseline gap-2 mb-3">
+        <span class="text-3xl font-black font-space text-dark counter-fluxo-mes">${r.total_pessoas.toLocaleString('pt-BR')}</span>
+        <span class="text-xs text-dark/40 font-semibold">pessoas no mês</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mb-2">
+        <div class="text-center bg-blue-50 rounded-lg p-2">
+          <i class="fa-solid fa-person text-blue-600 text-sm"></i>
+          <p class="text-[13px] font-black font-space text-blue-700 mt-0.5">${r.total_homens.toLocaleString('pt-BR')}</p>
+          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Homens</p>
+        </div>
+        <div class="text-center bg-pink-50 rounded-lg p-2">
+          <i class="fa-solid fa-person-dress text-pink-600 text-sm"></i>
+          <p class="text-[13px] font-black font-space text-pink-700 mt-0.5">${r.total_mulheres.toLocaleString('pt-BR')}</p>
+          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Mulheres</p>
+        </div>
+        <div class="text-center bg-amber-50 rounded-lg p-2">
+          <i class="fa-solid fa-child text-amber-600 text-sm"></i>
+          <p class="text-[13px] font-black font-space text-amber-700 mt-0.5">${r.total_criancas.toLocaleString('pt-BR')}</p>
+          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Crianças</p>
+        </div>
+      </div>`;
+
+    /* Render canal chart */
+    if (fluxoData.month.porCanal) {
+      const pc = fluxoData.month.porCanal;
+      const canalCtx = document.getElementById('chartFluxoCanal');
+      if (canalCtx) {
+        if (charts.fluxoCanal) charts.fluxoCanal.destroy();
+        const canalColors = ['#0a0a0a','#c4a265','#16a34a','#2563eb','#dc2626','#ca8a04','#9333ea','#ea580c','#0891b2','#db2777'];
+        charts.fluxoCanal = new Chart(canalCtx, {
+          type: 'bar',
+          data: {
+            labels: pc.labels.map(l => l.length > 15 ? l.substring(0, 14) + '...' : l),
+            datasets: [{
+              data: pc.totais,
+              backgroundColor: canalColors.map(c => c + '88'),
+              borderColor: canalColors,
+              borderWidth: 1,
+              borderRadius: 4,
+              barPercentage: 0.6
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => c.parsed.x + ' pessoas'}}},
+            scales: {
+              x: {grid: {color: 'rgba(0,0,0,.04)'}, ticks: {font: {size: 8}}},
+              y: {grid: {display: false}, ticks: {font: {size: 8, weight: 600}}}
+            }
+          }
+        });
+      }
+    }
+  } else {
+    mEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Dados mensais indisponiveis</p>';
+  }
+
+  /* Yesterday card - compare with same day Last Year */
+  const dEl = document.getElementById('fluxoDia');
+  if (!dEl) return;
+
+  if (fluxoData.yesterday && fluxoData.yesterday.resumo) {
+    const ry = fluxoData.yesterday.resumo;
+    const rly = fluxoData.ly && fluxoData.ly.resumo ? fluxoData.ly.resumo : null;
+    const lyDateLabel = fluxoData.lyDate ? formatDateBR(fluxoData.lyDate) : '---';
+    let changeHTML = '';
+
+    if (rly && rly.total_pessoas > 0) {
+      const change = ((ry.total_pessoas - rly.total_pessoas) / rly.total_pessoas * 100);
+      const isUp = change >= 0;
+      const arrow = isUp ? '<i class="fa-solid fa-arrow-up text-green-600"></i>' : '<i class="fa-solid fa-arrow-down text-red-600"></i>';
+      const changeColor = isUp ? 'text-green-600' : 'text-red-600';
+      changeHTML = `<span class="${changeColor} text-sm font-bold ml-2">${arrow} ${Math.abs(change).toFixed(1)}%</span>
+        <span class="text-[9px] text-dark/30 ml-1">vs Mesmo dia LY (${lyDateLabel}) — ${rly.total_pessoas}</span>`;
+    } else if (rly) {
+      changeHTML = `<span class="text-dark/30 text-[9px] ml-2">Mesmo dia LY (${lyDateLabel}): 0 pessoas</span>`;
+    } else {
+      changeHTML = `<span class="text-dark/30 text-[9px] ml-2">Dados LY (${lyDateLabel}) indisponiveis</span>`;
+    }
+
+    dEl.innerHTML = `
+      <div class="flex items-baseline gap-1 mb-3 flex-wrap">
+        <span class="text-3xl font-black font-space text-dark">${ry.total_pessoas.toLocaleString('pt-BR')}</span>
+        <span class="text-xs text-dark/40 font-semibold">pessoas ontem</span>
+        ${changeHTML}
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="text-center bg-blue-50 rounded-lg p-2">
+          <i class="fa-solid fa-person text-blue-600 text-sm"></i>
+          <p class="text-[13px] font-black font-space text-blue-700 mt-0.5">${ry.total_homens.toLocaleString('pt-BR')}</p>
+          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Homens</p>
+        </div>
+        <div class="text-center bg-pink-50 rounded-lg p-2">
+          <i class="fa-solid fa-person-dress text-pink-600 text-sm"></i>
+          <p class="text-[13px] font-black font-space text-pink-700 mt-0.5">${ry.total_mulheres.toLocaleString('pt-BR')}</p>
+          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Mulheres</p>
+        </div>
+        <div class="text-center bg-amber-50 rounded-lg p-2">
+          <i class="fa-solid fa-child text-amber-600 text-sm"></i>
+          <p class="text-[13px] font-black font-space text-amber-700 mt-0.5">${ry.total_criancas.toLocaleString('pt-BR')}</p>
+          <p class="text-[8px] text-dark/30 uppercase tracking-wider font-bold">Crianças</p>
+        </div>
+      </div>`;
+  } else {
+    dEl.innerHTML = '<p class="text-dark/30 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Dados do dia anterior indisponiveis</p>';
+  }
+}
+
+/* ========================================================
+   MAIN DATA LOAD
+   ======================================================== */
+async function loadAllData() {
+  const ld = document.getElementById('loading');
+  if (ld) {
+    ld.classList.remove('hidden');
+    ld.style.opacity = '1';
+  }
+
+  try {
+    const [resumo, s1, s2, s3, s4, bd] = await Promise.all([
+      fetchS(GID.resumo), fetchS(GID.s1), fetchS(GID.s2),
+      fetchS(GID.s3), fetchS(GID.s4), fetchS(GID.bd)
+    ]);
+    D = {resumo, s1, s2, s3, s4, bd};
+    render();
+    const syncEl = document.getElementById('syncLabel');
+    if (syncEl) syncEl.textContent = new Date().toLocaleString('pt-BR');
+    const errEl = document.getElementById('errorBanner');
+    if (errEl) errEl.classList.add('hidden');
+  } catch (e) {
+    console.error(e);
+    const b = document.getElementById('errorBanner');
+    if (b) {
+      b.classList.remove('hidden');
+      b.innerHTML = 'Falha na sincronização. Abra o <code>dashboard.html</code> direto no navegador.';
+    }
+  }
+
+  /* Hide loading screen safely */
+  if (ld) {
+    ld.style.opacity = '0';
+    setTimeout(() => {
+      ld.classList.add('hidden');
+      ld.style.opacity = '1';
+    }, 500);
+  }
+
+  initScrollReveal();
+}
+
+/* ========================================================
+   DATA EXTRACTORS
+   ======================================================== */
+function getKPIs() {
+  const r = D.resumo, o = {};
+  for (const row of r) {
+    const id = row[0];
+    if (id === '6') { o.metaS = [pR(row[2]), pR(row[3]), pR(row[4]), pR(row[5])]; o.metaTotal = pR(row[6]); }
+    if (id === '7') { o.realS = [pR(row[2]), pR(row[3]), pR(row[4]), pR(row[5])]; o.realTotal = pR(row[6]); o.tkm = row[9] || ''; }
+    if (id === '8') { o.pctS = [pP(row[2]), pP(row[3]), pP(row[4]), pP(row[5])]; }
+    if (id === '9') { o.diffTotal = pR(row[6]); }
+    if (id === '13') { o.realMes = pR(row[1]); o.metaMes = pR(row[3]); o.pctMes = pP(row[5]); }
+    if (id === '16') { o.metaDiaNec = pR(row[1]); o.projecao = pR(row[3]); o.pctProj = pP(row[5]); }
+    if (id === '18') { o.diasRest = parseInt(row[8]) || 0; o.diasTrab = parseInt(row[9]) || 0; o.diasTot = parseInt(row[10]) || 0; o.refLY = pR(row[11]); o.pctLY = pP(row[12]); }
+    if (id === '19') { o.pu = row[8] || ''; o.pa = row[10] || ''; }
+    if (id === '20') { o.ritmo = (row[9] || '').trim(); }
+  }
+  /* Defaults for missing values */
+  o.metaS = o.metaS || [0,0,0,0];
+  o.realS = o.realS || [0,0,0,0];
+  o.pctS = o.pctS || [0,0,0,0];
+  o.ritmo = o.ritmo || '';
+  o.pctMes = o.pctMes || 0;
+  o.diffTotal = o.diffTotal || 0;
+  o.realMes = o.realMes || 0;
+  o.metaMes = o.metaMes || 0;
+  o.projecao = o.projecao || 0;
+  o.pctProj = o.pctProj || 0;
+  o.metaDiaNec = o.metaDiaNec || 0;
+  o.diasRest = o.diasRest || 0;
+  o.diasTrab = o.diasTrab || 0;
+  o.diasTot = o.diasTot || 0;
+  o.refLY = o.refLY || 0;
+  o.pctLY = o.pctLY || 0;
+  return o;
+}
+
+function getRanking() {
+  const out = [];
+  let inside = false;
+  for (const r of D.resumo) {
+    if ((r[1] || '').includes('RANKING INDIVIDUAL')) { inside = true; continue; }
+    if (inside && (r[1] || '').includes('COMISSIONAMENTO')) break;
+    if (inside && r[2] && r[3] && r[1] !== 'Rank' && r[2] !== 'Vendedor') {
+      out.push({
+        rank: r[1], nome: r[2], meta: pR(r[3]), real: pR(r[4]),
+        pct: pP(r[5]), gap: pR(r[6]), metaDia: pR(r[7]), proj: pR(r[8]),
+        pctProj: pP(r[9]), media: pR(r[10]), melhorDia: r[11] || '',
+        status: r[12] || '', isTotal: r[2].includes('TOTAL')
+      });
+    }
+  }
+  return out;
+}
+
+function getComm() {
+  const out = [];
+  let inside = false;
+  for (const r of D.resumo) {
+    if ((r[1] || '').includes('COMISSIONAMENTO')) { inside = true; continue; }
+    if (inside && r[1] && r[1] !== 'Vendedor') {
+      out.push({
+        nome: r[1], s1: r[2] || '', s2: r[3] || '', s3: r[4] || '',
+        s4: r[5] || '', total: r[6] || '', pct: r[7] || '',
+        faixa: (r[8] || '').replace(/&gt;/g, '>'), status: r[9] || '',
+        isTotal: r[1].includes('TOTAL')
+      });
+    }
+  }
+  return out;
+}
+
+function getSellerWeekly(nome) {
+  const weeks = [D.s1, D.s2, D.s3, D.s4];
+  return weeks.map(sem => {
+    for (const r of sem) {
+      if ((r[2] || '').trim() === nome) return {meta: pR(r[3]), real: pR(r[10]), pct: pP(r[12])};
+    }
+    return {meta: 0, real: 0, pct: 0};
+  });
+}
+
+function getDaily() {
+  return [
+    {n:'S1', d:parseSem(D.s1)}, {n:'S2', d:parseSem(D.s2)},
+    {n:'S3', d:parseSem(D.s3)}, {n:'S4', d:parseSem(D.s4)}
+  ];
+}
+
+function parseSem(rows) {
+  const out = [];
+  for (const r of rows) {
+    if (!r[2] || r[2] === 'Vendedor' || r[2] === 'Meta Semanal') continue;
+    const v = r[2];
+    if (!v || v === 'Outros' || v.includes('RESUMO') || v.includes('Meta Total')) break;
+    out.push({
+      nome: v, meta: pR(r[3]),
+      vals: [pR(r[4]), pR(r[5]), pR(r[6]), pR(r[7]), pR(r[8]), pR(r[9])],
+      total: pR(r[10]), pct: pP(r[12]), status: r[16] || r[15] || ''
+    });
+  }
+  return out;
+}
+
+function getBD() {
+  const dm = {};
+  D.bd.forEach(r => {
+    if (r.length < 12) return;
+    const dep = (r[4] || '').trim();
+    const v = pR(r[11]);
+    if (dep && !dep.includes('DEPARTAMENTO')) {
+      const n = dep.replace(/^\d+\s*-\s*/, '');
+      dm[n] = (dm[n] || 0) + v;
+    }
+  });
+  return Object.entries(dm).sort((a, b) => b[1] - a[1]);
+}
+
+function getSetores() {
+  const rank = getRanking().filter(r => !r.isTotal);
+  const s = {'Chapelaria': 0, 'Selaria': 0, 'Vestuário': 0};
+  rank.forEach(r => { s[getSetor(r.nome)] += r.real; });
+  return Object.entries(s).sort((a, b) => b[1] - a[1]);
+}
+
+/* ========================================================
+   MAIN RENDER ORCHESTRATOR
+   ======================================================== */
+function render() {
+  const k = getKPIs();
+  renderKPIs(k);
+  const rank = getRanking();
+  renderSellerCards(rank);
+  renderRankTable(rank);
+  renderRankChart(rank);
+  populateFilter(rank);
+  renderCommTable(getComm());
+  renderWeeklyChart(k);
+  const daily = getDaily();
+  renderEvoChart(daily);
+  renderHeatmap(daily);
+  renderDeptChart(getBD());
+  renderSetorChart(getSetores());
+  initScrollReveal();
+}
+
+/* ========================================================
+   RENDER KPIs
+   ======================================================== */
+function renderKPIs(k) {
+  const pc = k.pctMes >= 80 ? 'text-green-600' : k.pctMes >= 50 ? 'text-yellow-600' : 'text-red-600';
+  const rNorm = normAccent(k.ritmo);
+  const rc = rNorm.includes('CRIT') ? 'text-red-600' : rNorm.includes('ATEN') ? 'text-yellow-600' : 'text-green-600';
+  const ritmoIcon = rNorm.includes('CRIT') ? 'fa-horse-head' : rNorm.includes('ATEN') ? 'fa-person-walking' : 'fa-horse';
+  const ritmoDesc = rNorm.includes('CRIT') ? 'Vendas abaixo do ritmo necessário' : rNorm.includes('ATEN') ? 'Ritmo moderado, precisa acelerar' : 'Ritmo forte, mantendo o passo';
+
+  const mainEl = document.getElementById('kpiMain');
+  if (mainEl) {
+    mainEl.innerHTML = `
+      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Realizado no Mês</p><p class="text-2xl font-black font-space text-green-600 tracking-tight kpi-counter" data-target="${k.realMes}">${fK(k.realMes)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">Meta: ${fK(k.metaMes)}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Atingimento</p><p class="text-2xl font-black font-space ${pc} tracking-tight">${fP(k.pctMes)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">Faltam ${fK(k.diffTotal)}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Projeção Mensal</p><p class="text-2xl font-black font-space text-blue-600 tracking-tight kpi-counter" data-target="${k.projecao}">${fK(k.projecao)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${fP(k.pctProj)} da meta</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Meta Diária Necessária</p><p class="text-2xl font-black font-space text-yellow-600 tracking-tight kpi-counter" data-target="${k.metaDiaNec}">${fK(k.metaDiaNec)}</p><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${k.diasRest} dias restantes</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/8 rounded-xl p-5 card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1.5px] font-extrabold mb-2">Ritmo</p><div class="flex items-center gap-2"><i class="fa-solid ${ritmoIcon} text-2xl ${rc}"></i><p class="text-xl font-black font-space ${rc} tracking-tight">${k.ritmo || '---'}</p></div><p class="text-[10px] text-dark/30 mt-1.5 font-medium">${ritmoDesc}</p></div>`;
+
+    /* Animate KPI counters */
+    mainEl.querySelectorAll('.kpi-counter').forEach(el => {
+      const target = parseFloat(el.getAttribute('data-target'));
+      if (target > 0) animateCounter(el, target, '', '', 1500);
+    });
+  }
+
+  const secEl = document.getElementById('kpiSec');
+  if (secEl) {
+    secEl.innerHTML = `
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Dias Trab.</p><p class="text-[15px] font-black font-space">${k.diasTrab}<span class="text-[11px] font-normal text-dark/25">/${k.diasTot}</span></p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Dias Rest.</p><p class="text-[15px] font-black font-space text-yellow-600">${k.diasRest}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Ref. LY</p><p class="text-[15px] font-black font-space">${fK(k.refLY)}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">% vs LY</p><p class="text-[15px] font-black font-space ${k.pctLY >= 100 ? 'text-green-600' : 'text-red-600'}">${fP(k.pctLY)}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">Ticket Medio</p><p class="text-[15px] font-black font-space">${k.tkm || '---'}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">P.U</p><p class="text-[15px] font-black font-space">${k.pu || '---'}</p></div>
+      <div class="kpi-card bg-palha-50 border border-dark/5 rounded-lg p-3 text-center card-hover"><p class="text-[8px] text-dark/30 uppercase tracking-[1px] font-extrabold mb-1">P.A</p><p class="text-[15px] font-black font-space">${k.pa || '---'}</p></div>`;
+  }
+}
+
+/* ========================================================
+   SELLER CARDS
+   ======================================================== */
+function renderSellerCards(rank) {
+  const el = document.getElementById('sellerCards');
+  if (!el) return;
+  const sellers = rank.filter(r => !r.isTotal);
+  let html = '';
+
+  sellers.forEach((s, idx) => {
+    const weeks = getSellerWeekly(s.nome);
+    let mood = cowboyMood(s.pct);
+    const setor = getSetor(s.nome);
+    const faixa = calcFaixa(s.pct);
+    const comEst = s.real * faixa.taxa;
+    const stNorm = normAccent(s.status);
+    const isAcima = stNorm.includes('ACIMA') || stNorm.includes('EXCELENTE') || s.pct >= 100;
+    const bc = isAcima ? 'bg-green-500' : s.pct >= 80 ? 'bg-green-500' : s.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+    const tc = isAcima ? 'text-green-600' : s.pct >= 80 ? 'text-green-600' : s.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
+    const statusTxt = s.status || mood.label;
+    const initials = s.nome.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+    if (isAcima) {
+      mood = {icon:'fa-hat-cowboy', bg:'bg-green-600', ring:'ring-green-400', badge:'bg-green-500/20 text-green-400', label: mood.label, extra:'<i class="fa-solid fa-star text-[8px] text-yellow-400 absolute -top-0.5 -right-0.5"></i>'};
+    }
+
+    const weeksHTML = weeks.map((w, i) => {
+      const wp = w.meta > 0 ? Math.min((w.real / w.meta) * 100, 100) : 0;
+      const wc = w.pct >= 100 ? 'bg-green-500' : w.pct >= 70 ? 'bg-yellow-500' : 'bg-red-400';
+      return `<div>
+        <div class="flex justify-between items-center py-1.5">
+          <span class="text-[9px] font-bold text-dark/30 uppercase tracking-wider w-12">Sem ${i + 1}</span>
+          <span class="text-[11px] font-bold font-space text-dark">${fK(w.real)}</span>
+          <span class="text-[9px] text-dark/25 font-medium">meta ${fK(w.meta)}</span>
+        </div>
+        <div class="w-full h-1 bg-dark/5 rounded-full overflow-hidden">
+          <div class="h-full rounded-full ${wc} progress-bar-anim" style="width:0%" data-target-width="${wp}%"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="bg-palha-50 border border-dark/5 rounded-xl overflow-hidden card-hover seller-card-stagger" style="opacity:0;transform:translateY(15px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1);transition-delay:${idx * 0.07}s;box-shadow:0 4px 24px rgba(124,92,62,0.08)">
+      <div class="bg-dark p-4 flex items-center gap-3">
+        <div class="relative shrink-0">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full ${mood.bg} ring-2 ${mood.ring} flex flex-col items-center justify-center">
+            <i class="fa-solid ${mood.icon} text-white text-[14px] sm:text-[16px] -mb-0.5"></i>
+            <span class="text-white font-black text-[9px] sm:text-[10px] font-space leading-none">${initials}</span>
+          </div>
+          ${mood.extra}
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-white text-sm font-bold font-space truncate">${s.nome}</h3>
+          <p class="text-[9px] text-white/35 font-semibold uppercase tracking-wider mt-0.5">${setor}</p>
+          <span class="inline-block mt-1 text-[7px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${mood.badge}">${statusTxt}</span>
+        </div>
+      </div>
+      <div class="mx-4 mt-2 h-1 bg-dark/5 rounded-full overflow-hidden"><div class="${bc} h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="${Math.min(s.pct, 100)}%"></div></div>
+      <div class="p-4 space-y-1">${weeksHTML}</div>
+      <div class="bg-palha-200/40 p-3 grid grid-cols-2 gap-2 text-center">
+        <div><p class="text-[7px] text-dark/30 uppercase tracking-wider font-extrabold">Atingimento</p><p class="text-[15px] font-black font-space ${tc} mt-0.5">${fP(s.pct)}</p></div>
+        <div><p class="text-[7px] text-dark/30 uppercase tracking-wider font-extrabold">Comissão Est.</p><p class="text-[15px] font-black font-space text-green-600 mt-0.5">${fK(comEst)}</p></div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+
+  /* Staggered fade-in */
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.seller-card-stagger').forEach(card => {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    });
+  });
+
+  /* Animate progress bars */
+  setTimeout(() => {
+    document.querySelectorAll('.progress-bar-anim').forEach(bar => {
+      const tw = bar.getAttribute('data-target-width');
+      if (tw) bar.style.width = tw;
+    });
+  }, 300);
+}
+
+/* ========================================================
+   CHARTS
+   ======================================================== */
+Chart.defaults.font.family = "'Inter',system-ui";
+Chart.defaults.color = '#999';
+const gC = 'rgba(0,0,0,.04)';
+
+function renderWeeklyChart(k) {
+  const ctx = document.getElementById('chartSemanal');
+  if (!ctx) return;
+  if (charts.sem) charts.sem.destroy();
+  charts.sem = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+      datasets: [
+        {label: 'Meta', data: k.metaS, backgroundColor: 'rgba(10,10,10,.08)', borderColor: 'rgba(10,10,10,.25)', borderWidth: 1, borderRadius: 6, barPercentage: 0.5},
+        {label: 'Realizado', data: k.realS, backgroundColor: k.realS.map((v, i) => v >= k.metaS[i] ? 'rgba(22,163,74,.3)' : 'rgba(220,38,38,.3)'), borderColor: k.realS.map((v, i) => v >= k.metaS[i] ? '#16a34a' : '#dc2626'), borderWidth: 1, borderRadius: 6, barPercentage: 0.5}
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend: {labels: {usePointStyle: true, pointStyle: 'rectRounded', padding: 14, font: {size: 10, weight: 600}}}},
+      scales: {
+        x: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}},
+        y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}}
+      }
+    }
+  });
+}
+
+function renderRankChart(rank) {
+  const s = rank.filter(r => !r.isTotal).sort((a, b) => b.pct - a.pct);
+  const ctx = document.getElementById('chartRanking');
+  if (!ctx) return;
+  if (charts.rank) charts.rank.destroy();
+  charts.rank = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: s.map(x => x.nome),
+      datasets: [{
+        data: s.map(x => x.pct),
+        backgroundColor: s.map(x => x.pct >= 80 ? 'rgba(22,163,74,.35)' : x.pct >= 50 ? 'rgba(202,138,4,.35)' : 'rgba(220,38,38,.35)'),
+        borderColor: s.map(x => x.pct >= 80 ? '#16a34a' : x.pct >= 50 ? '#ca8a04' : '#dc2626'),
+        borderWidth: 1, borderRadius: 4, barPercentage: 0.55
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {legend: {display: false}},
+      scales: {
+        x: {grid: {color: gC}, ticks: {callback: v => v + '%', font: {size: 9}}, suggestedMax: 120},
+        y: {grid: {display: false}, ticks: {font: {size: 10, weight: 600}}}
+      }
+    }
+  });
+}
+
+function renderEvoChart(daily) {
+  const ctx = document.getElementById('chartEvolucao');
+  if (!ctx) return;
+  if (charts.evo) charts.evo.destroy();
+  const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  const labels = [];
+  daily.forEach(w => days.forEach(d => labels.push(w.n + ' ' + d)));
+  const dt = [];
+  daily.forEach(w => {
+    for (let i = 0; i < 6; i++) {
+      let t = 0;
+      w.d.forEach(s => t += (s.vals[i] || 0));
+      dt.push(t);
+    }
+  });
+  const cum = [];
+  let ac = 0;
+  dt.forEach(v => { ac += v; cum.push(ac); });
+  const k = getKPIs();
+  const ml = labels.map((_, i) => k.metaMes * (i + 1) / labels.length);
+
+  charts.evo = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {label: 'Realizado Acum.', data: cum, borderColor: '#0a0a0a', backgroundColor: 'rgba(10,10,10,.03)', fill: true, tension: 0.35, pointRadius: 1, pointHoverRadius: 4, borderWidth: 2},
+        {label: 'Meta Linear', data: ml, borderColor: 'rgba(220,38,38,.3)', borderDash: [5, 4], pointRadius: 0, borderWidth: 1.5, fill: false}
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend: {labels: {usePointStyle: true, padding: 12, font: {size: 10, weight: 600}}}},
+      scales: {
+        x: {grid: {display: false}, ticks: {maxRotation: 45, font: {size: 7}}},
+        y: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e6).toFixed(1) + 'M', font: {size: 9}}}
+      }
+    }
+  });
+}
+
+function renderDeptChart(deps) {
+  const ctx = document.getElementById('chartDepto');
+  if (!ctx) return;
+  if (charts.dep) charts.dep.destroy();
+  const colors = ['#0a0a0a', '#c4a265', '#16a34a', '#2563eb', '#dc2626', '#ca8a04', '#9333ea', '#ea580c', '#059669'];
+  charts.dep = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: deps.map(d => d[0]),
+      datasets: [{data: deps.map(d => d[1]), backgroundColor: colors.map(c => c + 'cc'), borderColor: '#faf7f0', borderWidth: 2, hoverOffset: 5}]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      plugins: {legend: {position: 'right', labels: {usePointStyle: true, pointStyle: 'circle', padding: 8, font: {size: 9, weight: 500}}}}
+    }
+  });
+}
+
+function renderSetorChart(setores) {
+  const ctx = document.getElementById('chartSetor');
+  if (!ctx) return;
+  if (charts.cat) charts.cat.destroy();
+  const total = setores.reduce((a, s) => a + s[1], 0);
+  const cores = {Chapelaria: '#c4a265', Selaria: '#ca8a04', Vestuário: '#16a34a'};
+  const vendMap = {Chapelaria: 'Agnaldo, João', Selaria: 'Luiz Alberto', Vestuário: 'Manoel, Michele, Karol, Kaue, Julio, Alexandre, Fernando, Ledson'};
+
+  charts.cat = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: setores.map(s => s[0]),
+      datasets: [{
+        data: setores.map(s => s[1]),
+        backgroundColor: setores.map(s => (cores[s[0]] || '#2563eb') + '66'),
+        borderColor: setores.map(s => cores[s[0]] || '#2563eb'),
+        borderWidth: 1.5, borderRadius: 8, barPercentage: 0.45
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {callbacks: {
+          label: c => fR(c.parsed.x) + ' (' + fP(c.parsed.x / total * 100) + ')',
+          afterLabel: c => 'Vendedores: ' + vendMap[setores[c.dataIndex][0]]
+        }}
+      },
+      scales: {
+        x: {grid: {color: gC}, ticks: {callback: v => 'R$ ' + (v / 1e3).toFixed(0) + 'k', font: {size: 9}}},
+        y: {grid: {display: false}, ticks: {font: {size: 12, weight: 700}}}
+      }
+    }
+  });
+}
+
+/* ========================================================
+   HEATMAP
+   ======================================================== */
+function renderHeatmap(daily) {
+  const el = document.getElementById('heatmapBox');
+  if (!el) return;
+  const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  const names = new Set();
+  daily.forEach(w => w.d.forEach(s => names.add(s.nome)));
+  const sellers = [...names];
+  let mx = 0;
+  daily.forEach(w => w.d.forEach(s => s.vals.forEach(v => { if (v > mx) mx = v; })));
+
+  let h = '<table class="w-full border-collapse text-[10px] min-w-[700px]"><thead><tr><th class="p-1.5 text-left text-[7px] font-extrabold text-dark/30 uppercase tracking-wider border-b border-dark/5">Vendedor</th>';
+  daily.forEach(w => days.forEach(d => h += '<th class="p-1 text-center text-[7px] font-bold text-dark/25 uppercase border-b border-dark/5">' + w.n + ' ' + d + '</th>'));
+  h += '</tr></thead><tbody>';
+
+  sellers.forEach(name => {
+    h += '<tr><td class="text-left font-bold text-dark/50 pl-1.5 py-0.5 text-[10px]">' + name + '</td>';
+    daily.forEach(w => {
+      const s = w.d.find(x => x.nome === name);
+      days.forEach((_, di) => {
+        const v = s ? (s.vals[di] || 0) : 0;
+        const int = mx ? v / mx : 0;
+        let bg, fg;
+        if (v === 0) { bg = 'rgba(0,0,0,.02)'; fg = '#ccc'; }
+        else if (int > 0.6) { bg = 'rgba(22,163,74,' + (0.15 + int * 0.55) + ')'; fg = '#fff'; }
+        else if (int > 0.3) { bg = 'rgba(196,162,101,' + (0.1 + int * 0.5) + ')'; fg = '#fff'; }
+        else { bg = 'rgba(220,38,38,' + (0.08 + int * 0.45) + ')'; fg = '#fff'; }
+        h += '<td class="p-0.5"><div class="hm-cell" style="background:' + bg + ';color:' + fg + '" title="' + name + ': ' + fR(v) + '">' + (v > 0 ? (v / 1e3).toFixed(1) + 'k' : '.') + '</div></td>';
+      });
+    });
+    h += '</tr>';
+  });
+
+  el.innerHTML = h + '</tbody></table>';
+}
+
+/* ========================================================
+   TABLE HELPERS
+   ======================================================== */
+function badgeFor(st) {
+  const s = (st || '').toLowerCase();
+  if (s.includes('excelente') || s.includes('acima')) return 'bg-green-600/10 text-green-700';
+  if (s.includes('caminho') || s.includes('bom')) return 'bg-blue-600/10 text-blue-700';
+  if (s.includes('aten')) return 'bg-yellow-600/10 text-yellow-700';
+  return 'bg-red-600/10 text-red-700';
+}
+
+/* ========================================================
+   RANKING TABLE - TOTAL row with dark bg
+   ======================================================== */
+function renderRankTable(rank) {
+  const b = document.getElementById('rankBody');
+  if (!b) return;
+  b.innerHTML = '';
+
+  rank.forEach(r => {
+    const bc = r.pct >= 80 ? 'bg-green-500' : r.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+    const tc = r.pct >= 80 ? 'text-green-600' : r.pct >= 50 ? 'text-yellow-600' : 'text-red-600';
+    /* TOTAL EQUIPE gets dark background with light text */
+    const tot = r.isTotal ? ' bg-dark text-palha-50 font-bold' : '';
+    const totalTextGreen = r.isTotal ? 'text-green-300' : 'text-green-700';
+    const totalTextRed = r.isTotal ? 'text-red-300' : 'text-red-600';
+    const totalPctColor = r.isTotal ? (r.pct >= 80 ? 'text-green-300' : r.pct >= 50 ? 'text-yellow-300' : 'text-red-300') : tc;
+
+    b.innerHTML += `<tr class="${tot}" data-v="${r.nome}">
+      <td class="px-3 py-2.5 font-bold ${r.isTotal ? 'text-palha-50/50' : 'text-dark/30'} tabular-nums font-space whitespace-nowrap">${r.rank}</td>
+      <td class="px-3 py-2.5 font-bold whitespace-nowrap">${r.nome}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.meta)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-bold ${totalTextGreen} whitespace-nowrap">${fR(r.real)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-extrabold ${totalPctColor} whitespace-nowrap">${fP(r.pct)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold ${totalTextRed} whitespace-nowrap">${fR(r.gap)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.metaDia)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fR(r.proj)}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${fP(r.pctProj)}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${r.status ? '<span class="inline-block px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(r.status) + '">' + r.status + '</span>' : ''}</td>
+      <td class="px-3 py-2.5 min-w-[80px]"><div class="w-full h-1 ${r.isTotal ? 'bg-palha-50/20' : 'bg-dark/5'} rounded-full overflow-hidden"><div class="${bc} h-full rounded-full progress-bar-anim" style="width:0%" data-target-width="${Math.min(r.pct, 100)}%"></div></div></td>
+    </tr>`;
+  });
+
+  /* Animate table progress bars */
+  setTimeout(() => {
+    document.querySelectorAll('#rankBody .progress-bar-anim').forEach(bar => {
+      const tw = bar.getAttribute('data-target-width');
+      if (tw) bar.style.width = tw;
+    });
+  }, 200);
+}
+
+/* ========================================================
+   COMMISSION TABLE - TOTAL row with dark bg
+   ======================================================== */
+function renderCommTable(comm) {
+  const b = document.getElementById('commBody');
+  if (!b) return;
+  b.innerHTML = '';
+
+  comm.forEach(r => {
+    /* TOTAL EQUIPE gets dark background with light text */
+    const tot = r.isTotal ? ' bg-dark text-palha-50 font-bold' : '';
+    const totalTextGreen = r.isTotal ? 'text-green-300' : 'text-green-700';
+
+    b.innerHTML += `<tr class="${tot}">
+      <td class="px-3 py-2.5 font-bold whitespace-nowrap">${r.nome}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s1}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s2}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s3}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.s4}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-extrabold ${totalTextGreen} whitespace-nowrap">${r.total}</td>
+      <td class="px-3 py-2.5 tabular-nums font-space font-semibold whitespace-nowrap">${r.pct}</td>
+      <td class="px-3 py-2.5 text-[10px] ${r.isTotal ? 'text-palha-50/60' : 'text-dark/40'} whitespace-nowrap">${r.faixa}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${r.status ? '<span class="inline-block px-2.5 py-1 rounded-full text-[8px] font-extrabold uppercase tracking-wider ' + badgeFor(r.status) + '">' + r.status + '</span>' : ''}</td>
+    </tr>`;
+  });
+}
+
+/* ========================================================
+   FILTERS
+   ======================================================== */
+function populateFilter(rank) {
+  const sel = document.getElementById('fVendedor');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="todos">Todos</option>';
+  rank.filter(r => !r.isTotal).forEach(r => {
+    sel.innerHTML += '<option value="' + r.nome + '">' + r.nome + '</option>';
+  });
+  sel.value = cur || 'todos';
+}
+
+function applyFilters() {
+  const v = document.getElementById('fVendedor').value;
+  document.querySelectorAll('#rankBody tr').forEach(tr => {
+    const n = tr.getAttribute('data-v');
+    tr.style.display = (v === 'todos' || n === v || n === 'TOTAL EQUIPE') ? '' : 'none';
+  });
+}
+
+/* ========================================================
+   SHIPPING CALCULATOR (Melhor Envio Sandbox)
+   ======================================================== */
+async function calcularFrete() {
+  const cepInput = document.getElementById('cepDestino');
+  const cep = cepInput ? cepInput.value.replace(/\D/g, '') : '';
+  const el = document.getElementById('freteResultados');
+  if (!el) return;
+
+  if (cep.length !== 8) {
+    el.innerHTML = '<p class="text-red-600 text-xs font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>CEP invalido. Informe 8 digitos.</p>';
+    return;
+  }
+
+  if (ME_TOKEN === 'SEU_TOKEN_SANDBOX') {
+    el.innerHTML = '<p class="text-yellow-700 text-xs leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Configure o token do Melhor Envio no codigo (variavel ME_TOKEN). Crie uma conta em <a href="https://sandbox.melhorenvio.com.br" target="_blank" class="underline font-bold">sandbox.melhorenvio.com.br</a></p>';
+    return;
+  }
+
+  el.innerHTML = '<div class="flex items-center gap-2 text-dark/40 text-xs"><div class="w-4 h-4 border-2 border-dark/10 border-t-dark rounded-full animate-spin"></div>Consultando transportadoras...</div>';
+
+  const body = {
+    from: {postal_code: CEP_ORIGEM},
+    to: {postal_code: cep},
+    products: [{
+      id: "1",
+      width: parseFloat(document.getElementById('freteLargura').value) || 30,
+      height: parseFloat(document.getElementById('freteAltura').value) || 20,
+      length: parseFloat(document.getElementById('freteComp').value) || 40,
+      weight: parseFloat(document.getElementById('fretePeso').value) || 1,
+      insurance_value: parseFloat(document.getElementById('freteValor').value) || 100,
+      quantity: 1
+    }]
+  };
+
+  try {
+    const url = 'https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + ME_TOKEN,
+        'User-Agent': 'TexasCenter (contato@texascenter.com.br)'
+      },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    renderFreteResultados(data);
+  } catch (e) {
+    console.error('Frete error:', e);
+    el.innerHTML = '<p class="text-red-600 text-xs"><i class="fa-solid fa-circle-exclamation mr-1"></i>Erro na consulta. Tente novamente.</p>';
+  }
+}
+
+function renderFreteResultados(data) {
+  const el = document.getElementById('freteResultados');
+  if (!el) return;
+
+  /* Filter valid results and sort by price */
+  const valid = (Array.isArray(data) ? data : [])
+    .filter(s => !s.error && s.price)
+    .sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+
+  if (valid.length === 0) {
+    el.innerHTML = '<p class="text-dark/40 text-xs"><i class="fa-solid fa-box-open mr-1"></i>Nenhuma transportadora disponivel para este CEP.</p>';
+    return;
+  }
+
+  el.innerHTML = valid.map((s, i) => {
+    const isCheapest = i === 0;
+    const borderColor = isCheapest ? 'border-l-green-500' : 'border-l-palha-400';
+    const badge = isCheapest ? '<span class="text-[7px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-bold uppercase">Mais barato</span>' : '';
+    return `<div class="flex items-center gap-3 p-3 bg-white border border-dark/5 ${borderColor} border-l-[3px] rounded-lg mb-2 hover:shadow-md transition-all" style="animation:fadeIn .3s ease ${i * 0.08}s forwards;opacity:0">
+      <img src="${s.company?.picture || ''}" class="w-8 h-8 object-contain rounded" onerror="this.style.display='none'" alt="">
+      <div class="flex-1 min-w-0">
+        <p class="text-[11px] font-bold text-dark truncate">${s.name} ${badge}</p>
+        <p class="text-[9px] text-dark/40">${s.company?.name || ''} - ${s.delivery_range?.min || '?'}-${s.delivery_range?.max || '?'} dias uteis</p>
+      </div>
+      <p class="text-sm font-black font-space ${isCheapest ? 'text-green-600' : 'text-dark'} whitespace-nowrap">R$ ${parseFloat(s.price).toFixed(2)}</p>
+    </div>`;
+  }).join('');
+}
+
+/* CEP mask */
+document.getElementById('cepDestino')?.addEventListener('input', function(e) {
+  let v = e.target.value.replace(/\D/g, '').substring(0, 8);
+  if (v.length > 5) v = v.substring(0, 5) + '-' + v.substring(5);
+  e.target.value = v;
+});
+
+/* ========================================================
+   INITIALIZATION
+   ======================================================== */
+loadAllData();
+loadFluxoData();
+</script>
+</body>
+</html>
