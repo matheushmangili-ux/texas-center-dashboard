@@ -1383,32 +1383,56 @@ function openChartModal(chartKey, title) {
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Get source chart config
   const src = charts[chartKey];
   if (!src) return;
 
-  // Clone the chart config
-  const cfg = JSON.parse(JSON.stringify(src.config));
-  // Adjust for fullscreen
-  if (cfg.options) {
-    cfg.options.maintainAspectRatio = false;
-    cfg.options.responsive = true;
-    if (cfg.options.plugins && cfg.options.plugins.legend && cfg.options.plugins.legend.labels) {
-      cfg.options.plugins.legend.labels.font = cfg.options.plugins.legend.labels.font || {};
-      cfg.options.plugins.legend.labels.font.size = 13;
-      cfg.options.plugins.legend.labels.padding = 16;
+  if (modalChart) modalChart.destroy();
+
+  // Deep clone data (serializable) and rebuild options from scratch
+  const srcData = JSON.parse(JSON.stringify(src.data));
+  const srcType = src.config.type;
+
+  // Build clean fullscreen options
+  const fsOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { usePointStyle: true, pointStyle: src.config.type === 'doughnut' ? 'circle' : 'rectRounded', padding: 16, font: { size: 13, weight: 600 } } },
+      tooltip: { bodyFont: { size: 13 }, titleFont: { size: 13 } }
     }
-    if (cfg.options.scales) {
-      Object.values(cfg.options.scales).forEach(s => {
-        if (s.ticks) { s.ticks.font = s.ticks.font || {}; s.ticks.font.size = 12; }
-      });
-    }
+  };
+
+  // Copy over special options from source
+  const srcOpts = src.config.options || {};
+  if (srcOpts.indexAxis) fsOpts.indexAxis = srcOpts.indexAxis;
+  if (srcType === 'doughnut') { fsOpts.cutout = srcOpts.cutout || '58%'; fsOpts.plugins.legend.position = 'right'; }
+
+  // Rebuild scales with callbacks
+  if (srcOpts.scales) {
+    fsOpts.scales = {};
+    Object.entries(srcOpts.scales).forEach(([key, scale]) => {
+      fsOpts.scales[key] = {
+        grid: scale.grid || { display: true },
+        ticks: { font: { size: 12, weight: 500 } }
+      };
+      if (scale.grid && scale.grid.display === false) fsOpts.scales[key].grid = { display: false };
+      if (scale.ticks && scale.ticks.callback) fsOpts.scales[key].ticks.callback = scale.ticks.callback;
+      if (scale.ticks && scale.ticks.maxRotation !== undefined) fsOpts.scales[key].ticks.maxRotation = scale.ticks.maxRotation;
+      if (scale.suggestedMax) fsOpts.scales[key].suggestedMax = scale.suggestedMax;
+    });
   }
 
-  if (modalChart) modalChart.destroy();
+  // Copy tooltip callbacks
+  if (srcOpts.plugins && srcOpts.plugins.tooltip && srcOpts.plugins.tooltip.callbacks) {
+    fsOpts.plugins.tooltip.callbacks = srcOpts.plugins.tooltip.callbacks;
+  }
+  if (srcOpts.plugins && srcOpts.plugins.legend && srcOpts.plugins.legend.display === false) {
+    fsOpts.plugins.legend.display = false;
+  }
+
   setTimeout(() => {
-    modalChart = new Chart(canvas, cfg);
-  }, 50);
+    modalChart = new Chart(canvas, { type: srcType, data: srcData, options: fsOpts });
+  }, 80);
 }
 
 function closeChartModal() {
