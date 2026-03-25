@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tc-dashboard-v1';
+const CACHE_NAME = 'tc-dashboard-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -22,14 +22,18 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Network-first strategy for API calls, cache-first for assets
-  if (event.request.url.includes('googleapis.com') || event.request.url.includes('websamos') || event.request.url.includes('api.')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request).then(cached => cached || fetch(event.request))
-    );
-  }
+  /* Network-first for EVERYTHING — garante que sempre pega a versão mais recente.
+     Se offline, cai no cache como fallback. */
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        /* Atualiza o cache com a versão nova */
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
 });
