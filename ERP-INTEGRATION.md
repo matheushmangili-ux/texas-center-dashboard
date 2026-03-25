@@ -64,7 +64,7 @@ window.ERP_DATA = {
   topProdutos: [...],        // Top produtos
   vendedoresDia: [...],      // Ranking do dia
   estoque: {...},            // Resumo estoque
-  lastSync: '2026-03-24T...' // Timestamp do último sync
+  lastSync: '2026-03-25T...' // Timestamp do último sync
 };
 ```
 
@@ -73,14 +73,15 @@ window.ERP_DATA = {
 1. Na inicialização, se `ERP_CONFIG.enabled === true`, `erpSync()` é chamada
 2. A cada `refreshInterval` ms, `erpSync()` roda novamente
 3. Após cada sync, `render()` é chamada para atualizar a UI
-4. O botão **Sincronizar** no sidebar também dispara `erpSync()`
+4. O botão **Sincronizar** no sidebar também dispara `erpSync()` (com debounce — impede cliques duplos)
 
 ## Campos Impactados pela Integração
 
 | Campo no Dashboard | Fonte Atual | Fonte após ERP |
 |---------------------|-------------|----------------|
-| Vendido Hoje | Zerado | `ERP_DATA.vendidoHoje` |
+| Vendido Hoje | Zerado (aguardando ERP) | `ERP_DATA.vendidoHoje` |
 | % da Meta Diária | Zerado | Calculado automaticamente |
+| Sidebar — Vendido Hoje | R$ 0 | `ERP_DATA.vendidoHoje` |
 
 ## Testes
 
@@ -89,6 +90,23 @@ Para testar sem o ERP real, popule `window.ERP_DATA` manualmente no console:
 ```javascript
 window.ERP_DATA.vendidoHoje = 18500;
 render(); // Atualiza o dashboard
+```
+
+## Arquitetura Atual
+
+```
+index.html (SPA)
+├── Google Sheets (pubhtml)  ─── Metas, ranking, comissão
+├── WebSamos API             ─── Fluxo de pessoas
+│   └── adjustEndDate()      ─── Fix bug 2026 (data_fim + 1)
+├── AwesomeAPI               ─── Cotações câmbio
+├── Google News RSS           ─── Notícias Brasil + Agro
+├── Open-Meteo               ─── Previsão do tempo
+└── ERP Data System (futuro) ─── Vendas em tempo real
+    └── erpSync()            ─── Sincronização periódica (5 min)
+
+sw.js ─── Service Worker (network-first + cache fallback)
+manifest.json ─── PWA (instalável)
 ```
 
 ## Próximos Passos (Pós-Integração)
@@ -105,6 +123,7 @@ render(); // Atualiza o dashboard
 - O token da API deve ser mantido em variável de ambiente no Vercel (não no código)
 - Para produção, migrar para um backend (Node.js/Next.js) que faça o proxy das chamadas
 - Nunca expor credenciais do ERP no frontend em produção
+- O token do Melhor Envio (`ME_TOKEN`) também deve ser migrado para backend em produção
 
 ## Contato
 
